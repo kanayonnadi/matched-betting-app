@@ -79,6 +79,10 @@ class Opportunity:
     levels_consumed: Optional[int] = None
     fully_hedged: Optional[bool] = None
     order_book_timestamp: Optional[datetime] = None
+    depth_status: Optional[str] = None
+    available_contracts: Optional[Decimal] = None
+    requested_contracts: Optional[Decimal] = None
+    executable_contracts: Optional[Decimal] = None
     source_type: str = "MOCK"
     is_live: bool = False
     provenance: Optional[object] = None
@@ -183,7 +187,8 @@ def build_opportunity(
     label = event_label or f"{book_quote.home_team} vs {book_quote.away_team}"
 
     if execution is not None:
-        liquidity_sufficient = execution.fully_fillable
+        # Only genuinely verified depth is treated as hedgeable.
+        liquidity_sufficient = execution.depth_status == "VERIFIED"
     else:
         liquidity_sufficient = result.lay_stake <= exchange_quote.available_size
 
@@ -227,7 +232,11 @@ def build_opportunity(
         effective_lay_odds=execution.effective_lay_odds if execution else None,
         lay_slippage_pct=execution.slippage_pct if execution else None,
         levels_consumed=execution.levels_consumed if execution else None,
-        fully_hedged=execution.fully_fillable if execution else None,
+        fully_hedged=(execution.depth_status == "VERIFIED") if execution else None,
         order_book_timestamp=execution.book_timestamp if execution else None,
+        depth_status=execution.depth_status if execution else None,
+        available_contracts=execution.total_depth_contracts if execution else None,
+        requested_contracts=execution.requested_contracts if execution else None,
+        executable_contracts=execution.fillable_contracts if execution else None,
         event_confidence=None,
     )

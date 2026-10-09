@@ -1,0 +1,14 @@
+{
+  "generated_at": "2026-10-09T01:12:15.180615+00:00",
+  "promotion": "PointsBet Qualifying",
+  "sportsbook": "PointsBet Ontario",
+  "mode": "LIVE",
+  "status": "UNAVAILABLE",
+  "bookmaker_key": "pointsbetca",
+  "diagnostics": [
+    "PROVIDER_UNAVAILABLE"
+  ],
+  "message": "STX exchange is not configured; cannot verify executable liquidity.",
+  "recommendations": [],
+  "diagnostic_recommendations": 0
+}

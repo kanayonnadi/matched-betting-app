@@ -22,15 +22,15 @@ def _decimal(value):
 
 def _levels_from_pairs(pairs, max_price):
     levels = []
+    malformed = 0
     for price_raw, quantity_raw in pairs:
         price = _decimal(price_raw)
         quantity = _decimal(quantity_raw)
-        if price is None or quantity is None:
-            continue
-        if price <= ZERO or quantity <= ZERO or price >= max_price:
+        if price is None or quantity is None or price <= ZERO or quantity <= ZERO or price >= max_price:
+            malformed += 1
             continue
         levels.append(BookLevel(price=price, contracts=quantity, max_price=max_price))
-    return levels
+    return levels, malformed
 
 
 def build_order_book(
@@ -44,12 +44,16 @@ def build_order_book(
     if max_price is None or max_price <= ZERO:
         raise ValueError("max_price must be greater than 0")
     pairs = [(bid.get("price"), bid.get("quantity")) for bid in (bids or [])]
+    levels, malformed = _levels_from_pairs(pairs, max_price)
+    if malformed:
+        completeness = DepthCompleteness.INVALID.value
     return OrderBook(
         max_price=max_price,
-        levels=_levels_from_pairs(pairs, max_price),
+        levels=levels,
         timestamp=timestamp,
         source=source,
         completeness=completeness,
+        malformed_levels=malformed,
     )
 
 
@@ -65,10 +69,14 @@ def build_order_book_from_ws(
     if max_price is None or max_price <= ZERO:
         raise ValueError("max_price must be greater than 0")
     pairs = [((level or {}).get("p"), (level or {}).get("q")) for level in (ob or {}).get("b") or []]
+    levels, malformed = _levels_from_pairs(pairs, max_price)
+    if malformed:
+        completeness = DepthCompleteness.INVALID.value
     return OrderBook(
         max_price=max_price,
-        levels=_levels_from_pairs(pairs, max_price),
+        levels=levels,
         timestamp=timestamp,
         source=source,
         completeness=completeness,
+        malformed_levels=malformed,
     )

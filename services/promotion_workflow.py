@@ -69,6 +69,11 @@ class Recommendation:
     source_type: str
     stale: bool
     eligibility: str = ""
+    depth_status: str = ""
+    available_contracts: Optional[Decimal] = None
+    requested_contracts: Optional[Decimal] = None
+    executable_contracts: Optional[Decimal] = None
+    effective_price: Optional[Decimal] = None
     provenance: dict = field(default_factory=dict)
 
 
@@ -194,6 +199,10 @@ def _provenance_summary(opportunity) -> dict:
                 "effective_lay_odds": str(getattr(execution, "effective_lay_odds", None)),
                 "estimated_fee": str(getattr(execution, "estimated_fee", None)),
                 "depth_completeness": getattr(execution, "completeness", "UNKNOWN"),
+                "depth_status": getattr(execution, "depth_status", "UNKNOWN"),
+                "available_contracts": str(getattr(execution, "total_depth_contracts", None)),
+                "requested_contracts": str(getattr(execution, "requested_contracts", None)),
+                "executable_contracts": str(getattr(execution, "fillable_contracts", None)),
                 "book_age_seconds": str(getattr(execution, "book_age_seconds", None)),
                 "fee_model": "per_wager",
                 "fee_model_status": "EXTERNALLY_UNVERIFIED",
@@ -240,18 +249,24 @@ def _recommendation(opportunity, promotion=None) -> Recommendation:
         source_type=getattr(opportunity, "source_type", "MOCK"),
         stale=_opportunity_stale(opportunity),
         eligibility=eligibility,
+        depth_status=getattr(opportunity, "depth_status", "") or "",
+        available_contracts=getattr(opportunity, "available_contracts", None),
+        requested_contracts=getattr(opportunity, "requested_contracts", None),
+        executable_contracts=getattr(opportunity, "executable_contracts", None),
+        effective_price=getattr(opportunity, "effective_lay_odds", None),
         provenance=_provenance_summary(opportunity),
     )
 
 
-def rank_qualifying_bets(promotion: Promotion, opportunities, max_results=4):
+def rank_qualifying_bets(promotion: Promotion, opportunities, max_results=4, require_hedged=True):
     candidates = [
         c.opportunity
         for c in best_qualifying(promotion, opportunities, limit=100)
     ]
-    # Reject insufficient-liquidity opportunities.
-    executable = [o for o in candidates if _recommendation(o, promotion).fully_hedged]
-    recommendations = [_recommendation(o, promotion) for o in executable]
+    if require_hedged:
+        # Reject insufficient-liquidity opportunities.
+        candidates = [o for o in candidates if _recommendation(o, promotion).fully_hedged]
+    recommendations = [_recommendation(o, promotion) for o in candidates]
     recommendations.sort(
         key=lambda r: (
             r.opportunity.qualifying_loss,
@@ -262,15 +277,14 @@ def rank_qualifying_bets(promotion: Promotion, opportunities, max_results=4):
     return recommendations[:max_results]
 
 
-def rank_conversion_bets(token_amount, opportunities, max_results=4, promotion=None):
+def rank_conversion_bets(token_amount, opportunities, max_results=4, promotion=None, require_hedged=True):
     def conversion_value(opportunity):
         return opportunity.expected_profit
 
-    executable = [
-        o for o in opportunities
-        if o.kind is BetKind.FREE_BET_SNR and _recommendation(o, promotion).fully_hedged
-    ]
-    recommendations = [_recommendation(o, promotion) for o in executable]
+    candidates = [o for o in opportunities if o.kind is BetKind.FREE_BET_SNR]
+    if require_hedged:
+        candidates = [o for o in candidates if _recommendation(o, promotion).fully_hedged]
+    recommendations = [_recommendation(o, promotion) for o in candidates]
     recommendations.sort(key=lambda r: conversion_value(r.opportunity), reverse=True)
     return recommendations[:max_results]
 

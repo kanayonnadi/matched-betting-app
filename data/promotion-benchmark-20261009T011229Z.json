@@ -1,0 +1,14 @@
+{
+  "generated_at": "2026-10-09T01:12:29.194979+00:00",
+  "promotion": "PointsBet Qualifying",
+  "sportsbook": "PointsBet Ontario",
+  "mode": "LIVE",
+  "status": "UNAVAILABLE",
+  "bookmaker_key": "pointsbetca",
+  "diagnostics": [
+    "INELIGIBLE"
+  ],
+  "message": "Candidates exist but none satisfy the promotion's eligibility conditions.",
+  "recommendations": [],
+  "diagnostic_recommendations": 0
+}

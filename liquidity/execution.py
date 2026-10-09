@@ -16,7 +16,13 @@ from datetime import datetime, timezone
 from decimal import ROUND_CEILING, Decimal
 from typing import Optional
 
-from .models import ExecutionEstimate, Fill, OrderBook
+from .models import (
+    DepthCompleteness,
+    DepthStatus,
+    ExecutionEstimate,
+    Fill,
+    OrderBook,
+)
 
 ONE = Decimal("1")
 ZERO = Decimal("0")
@@ -60,11 +66,30 @@ def _ceil_cent(value: Decimal) -> Decimal:
     return value.quantize(CENT, rounding=ROUND_CEILING)
 
 
+def _depth_status(book: OrderBook, fill_ratio: Decimal, book_age_seconds, max_age) -> str:
+    if book.malformed_levels > 0:
+        return DepthStatus.INVALID.value
+    if book_age_seconds is not None and max_age is not None and book_age_seconds > Decimal(str(max_age)):
+        return DepthStatus.STALE.value
+    if not book.levels:
+        # No observable depth. A reportedly complete empty book is insufficient.
+        if book.completeness == DepthCompleteness.COMPLETE.value:
+            return DepthStatus.INSUFFICIENT.value
+        return DepthStatus.UNKNOWN.value
+    if fill_ratio >= ONE:
+        # Observed levels fully cover the required quantity -> executable.
+        return DepthStatus.VERIFIED.value
+    if book.completeness == DepthCompleteness.COMPLETE.value:
+        return DepthStatus.INSUFFICIENT.value
+    return DepthStatus.UNKNOWN.value
+
+
 def simulate_execution(
     book: OrderBook,
     required_contracts,
     fee_factor=ZERO,
     now: Optional[datetime] = None,
+    max_book_age_seconds=30,
 ) -> ExecutionEstimate:
     required = _to_decimal(required_contracts)
     if required <= ZERO:
@@ -117,6 +142,8 @@ def simulate_execution(
     if book.timestamp is not None:
         book_age_seconds = Decimal(str(max((reference - book.timestamp).total_seconds(), 0.0)))
 
+    depth_status = _depth_status(book, fill_ratio, book_age_seconds, max_book_age_seconds)
+
     return ExecutionEstimate(
         requested_contracts=required,
         fillable_contracts=fillable,
@@ -136,5 +163,6 @@ def simulate_execution(
         depth_ratio=depth_ratio,
         book_timestamp=book.timestamp,
         completeness=book.completeness,
+        depth_status=depth_status,
         book_age_seconds=book_age_seconds,
     )

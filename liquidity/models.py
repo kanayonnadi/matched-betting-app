@@ -51,6 +51,24 @@ class DepthCompleteness(str, Enum):
     COMPLETE = "COMPLETE"
     PARTIAL = "PARTIAL"
     UNKNOWN = "UNKNOWN"
+    INVALID = "INVALID"
+
+
+class DepthStatus(str, Enum):
+    """Whether a hedge is genuinely executable from observed depth.
+
+    VERIFIED      observed levels fully cover the required quantity.
+    INSUFFICIENT  a complete book is observed but cannot cover the quantity.
+    UNKNOWN       the book may be truncated and observed levels do not cover it.
+    STALE         the book exceeded the freshness threshold.
+    INVALID       malformed/contradictory depth that cannot be interpreted.
+    """
+
+    VERIFIED = "VERIFIED"
+    INSUFFICIENT = "INSUFFICIENT"
+    UNKNOWN = "UNKNOWN"
+    STALE = "STALE"
+    INVALID = "INVALID"
 
 
 @dataclass(frozen=True)
@@ -62,6 +80,7 @@ class OrderBook:
     timestamp: Optional[datetime] = None
     source: str = "stx"
     completeness: str = DepthCompleteness.UNKNOWN.value
+    malformed_levels: int = 0
 
     def __post_init__(self):
         ordered = tuple(sorted(self.levels, key=lambda level: level.price, reverse=True))
@@ -124,6 +143,7 @@ class ExecutionEstimate:
     depth_ratio: Decimal
     book_timestamp: Optional[datetime]
     completeness: str = DepthCompleteness.UNKNOWN.value
+    depth_status: str = DepthStatus.UNKNOWN.value
     book_age_seconds: Optional[Decimal] = None
 
 

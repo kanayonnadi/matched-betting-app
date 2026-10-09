@@ -130,7 +130,8 @@ def test_benchmark_reports_provenance():
     result = benchmark((10,), MockSportsbookProvider(), MockExchangeProvider(), now=NOW)
     assert result["provider_mode"] == "DEMO"
     row = result["stakes"][0]
-    assert "rejected_insufficient_depth" in row
+    assert "insufficient_depth" in row
+    assert "verified_depth" in row
     assert "max_slippage_pct" in row
 
 
@@ -139,7 +140,7 @@ def test_promotion_benchmark_uses_pipeline(monkeypatch):
 
     monkeypatch.setattr(discovery, "build_bookmaker_provider", lambda *a, **k: MockSportsbookProvider())
     result = run_promotion_benchmark(
-        promotion(), "LIVE", book=MockSportsbookProvider(), exchange=MockExchangeProvider(),
+        promotion(), "DEMO", book=MockSportsbookProvider(), exchange=MockExchangeProvider(),
         routes=[MOCK_ROUTE], save=False,
     )
     assert result["sportsbook"] == "BetMGM Ontario"

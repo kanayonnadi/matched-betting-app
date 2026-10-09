@@ -66,9 +66,10 @@ def test_discovery_is_scoped_to_promotion_bookmaker(monkeypatch):
     )
     assert captured == ["betmgm_ca_on"]  # never another bookmaker
     assert result.bookmaker_key == "betmgm_ca_on"
-    assert result.recommendations
-    # Mock providers => SIMULATED, never LIVE VERIFIED.
-    assert result.status == OpportunityStatus.SIMULATED.value
+    # Live mode with mock providers cannot verify real STX depth, so nothing is
+    # promoted to a primary (fully hedgeable) recommendation.
+    assert not result.recommendations
+    assert DiagnosticCode.UNKNOWN_DEPTH.value in result.diagnostics
 
 
 def test_unsupported_sportsbook_is_clear():
@@ -93,13 +94,15 @@ def test_no_eligible_markets_diagnostic(monkeypatch):
     assert not result.recommendations
 
 
-def test_insufficient_liquidity_diagnostic(monkeypatch):
+def test_unknown_depth_diagnostic_for_unverifiable_book(monkeypatch):
     monkeypatch.setattr(discovery, "build_bookmaker_provider", lambda *a, **k: MockSportsbookProvider())
+    # Mock exchange exposes no independent order book, so depth cannot be
+    # verified: report UNKNOWN, never a false INSUFFICIENT.
     result = discover_qualifying(
         promotion(), "LIVE", exchange=MockExchangeProvider(liquidity=Decimal("1")),
         routes=MOCK_ROUTES,
     )
-    assert DiagnosticCode.INSUFFICIENT_LIQUIDITY.value in result.diagnostics
+    assert DiagnosticCode.UNKNOWN_DEPTH.value in result.diagnostics
     assert not result.recommendations
 
 
@@ -125,7 +128,8 @@ def test_classify_recommendation():
     assert classify_recommendation(simulated, "DEMO") == OpportunityStatus.SIMULATED.value
 
     fresh = _recommendation(
-        replace(opp, source_type="LIVE", is_live=True, fully_hedged=True, timestamp=now)
+        replace(opp, source_type="LIVE", is_live=True, fully_hedged=True,
+                depth_status="VERIFIED", timestamp=now)
     )
     assert classify_recommendation(fresh, "LIVE") == OpportunityStatus.LIVE_VERIFIED.value
 
@@ -137,14 +141,20 @@ def test_classify_recommendation():
     )
     stale = _recommendation(
         replace(opp, source_type="LIVE", is_live=True, fully_hedged=True,
-                timestamp=old, provenance=aged_prov)
+                depth_status="VERIFIED", timestamp=old, provenance=aged_prov)
     )
     assert classify_recommendation(stale, "LIVE") == OpportunityStatus.LIVE_STALE.value
 
-    incomplete = _recommendation(
+    unknown = _recommendation(
         replace(opp, source_type="LIVE", is_live=True, fully_hedged=False, timestamp=now)
     )
-    assert classify_recommendation(incomplete, "LIVE") == OpportunityStatus.HEDGE_INCOMPLETE.value
+    assert classify_recommendation(unknown, "LIVE") == OpportunityStatus.UNKNOWN_DEPTH.value
+
+    insufficient = _recommendation(
+        replace(opp, source_type="LIVE", is_live=True, fully_hedged=False,
+                depth_status="INSUFFICIENT", timestamp=now)
+    )
+    assert classify_recommendation(insufficient, "LIVE") == OpportunityStatus.INSUFFICIENT_DEPTH.value
 
 
 # --- conversion discovery ----------------------------------------------------
@@ -152,7 +162,7 @@ def test_classify_recommendation():
 def test_conversion_discovery(monkeypatch):
     monkeypatch.setattr(discovery, "build_bookmaker_provider", lambda *a, **k: MockSportsbookProvider())
     result = discover_conversion(
-        promotion(), Decimal("20"), "LIVE", exchange=MockExchangeProvider(), routes=MOCK_ROUTES
+        promotion(), Decimal("20"), "DEMO", exchange=MockExchangeProvider(), routes=MOCK_ROUTES
     )
     assert result.recommendations
     assert all(r.opportunity.kind.value == "free_bet_snr" for r in result.recommendations)

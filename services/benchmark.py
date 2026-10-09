@@ -14,17 +14,8 @@ from datetime import datetime, timezone
 from decimal import Decimal
 from pathlib import Path
 
-from monitoring import is_stale
 from opportunities import discover_live_opportunities
 from providers import DEFAULT_ROUTES
-
-from .promotion_workflow import _opportunity_stale
-
-
-def _hedged(opportunity) -> bool:
-    if getattr(opportunity, "fully_hedged", None) is not None:
-        return bool(opportunity.fully_hedged)
-    return bool(opportunity.liquidity_sufficient)
 
 
 def _median(values):
@@ -38,29 +29,48 @@ def _source_mode(provider) -> str:
     return "LIVE" if getattr(provider, "source_type", "MOCK") == "LIVE" else "DEMO"
 
 
+def _depth_status(opportunity) -> str:
+    return getattr(opportunity, "depth_status", None) or "UNKNOWN"
+
+
 def benchmark(stakes, book, exchange, routes=DEFAULT_ROUTES, now=None) -> dict:
     rows = []
     for stake in stakes:
         opportunities = list(
             discover_live_opportunities(book, exchange, list(routes), float(stake))
         )
-        fully = [o for o in opportunities if _hedged(o)]
-        executions = [o.execution for o in fully if getattr(o, "execution", None) is not None]
-        slippages = [o.lay_slippage_pct for o in fully if getattr(o, "lay_slippage_pct", None) is not None]
+        verified = [o for o in opportunities if _depth_status(o) == "VERIFIED"]
+        slippages = [
+            o.lay_slippage_pct for o in verified
+            if getattr(o, "lay_slippage_pct", None) is not None
+        ]
+        available = [
+            getattr(o, "available_contracts", None) for o in verified
+            if getattr(o, "available_contracts", None) is not None
+        ]
+        executable = [
+            getattr(o, "executable_contracts", None) for o in verified
+            if getattr(o, "executable_contracts", None) is not None
+        ]
+        worst_case = [min(o.profit_if_back, o.profit_if_lay) for o in verified]
         rows.append(
             {
                 "stake": str(stake),
-                "opportunities": len(opportunities),
-                "fully_hedgeable": len(fully),
-                "rejected_insufficient_depth": len(opportunities) - len(fully),
-                "rejected_stale": sum(1 for o in opportunities if _opportunity_stale(o)),
-                "median_depth": str(_median([e.fillable_contracts for e in executions])) if executions else None,
+                "matched_markets": len(opportunities),
+                "verified_depth": len(verified),
+                "unknown_depth": sum(1 for o in opportunities if _depth_status(o) == "UNKNOWN"),
+                "insufficient_depth": sum(1 for o in opportunities if _depth_status(o) == "INSUFFICIENT"),
+                "stale_depth": sum(1 for o in opportunities if _depth_status(o) == "STALE"),
+                "invalid_depth": sum(1 for o in opportunities if _depth_status(o) == "INVALID"),
+                "fully_hedgeable": len(verified),
+                "median_available_depth": str(_median(available)) if available else None,
+                "median_executable_contracts": str(_median(executable)) if executable else None,
                 "median_slippage_pct": str(_median(slippages)) if slippages else None,
                 "max_slippage_pct": str(max(slippages)) if slippages else None,
-                "median_qualifying_loss": str(_median([o.qualifying_loss for o in fully])) if fully else None,
-                "median_liability": str(_median([o.lay_liability for o in fully])) if fully else None,
+                "median_exchange_capital": str(_median([o.lay_liability for o in verified])) if verified else None,
+                "median_worst_case_ql": str(_median(worst_case)) if worst_case else None,
                 "liquidity_grades": {
-                    grade: sum(1 for o in fully if o.liquidity_grade == grade)
+                    grade: sum(1 for o in verified if o.liquidity_grade == grade)
                     for grade in ("HIGH", "MEDIUM", "LOW")
                 },
             }
@@ -154,9 +164,14 @@ def run_promotion_benchmark(
                 "eligibility": r.eligibility,
                 "source_mode": r.provenance.get("source_mode"),
                 "depth_completeness": r.provenance.get("depth_completeness"),
+                "depth_status": r.depth_status,
+                "available_contracts": str(r.available_contracts) if r.available_contracts is not None else None,
+                "requested_contracts": str(r.requested_contracts) if r.requested_contracts is not None else None,
+                "executable_contracts": str(r.executable_contracts) if r.executable_contracts is not None else None,
             }
             for r in result.recommendations
         ],
+        "diagnostic_recommendations": len(result.diagnostic_recommendations or ()),
     }
     return _write(payload, "promotion-benchmark", output_dir) if save else payload
 

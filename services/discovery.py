@@ -33,6 +33,8 @@ class DiagnosticCode(str, Enum):
     NO_STX_MARKETS = "NO_STX_MARKETS"
     INELIGIBLE = "INELIGIBLE"
     INSUFFICIENT_LIQUIDITY = "INSUFFICIENT_LIQUIDITY"
+    UNKNOWN_DEPTH = "UNKNOWN_DEPTH"
+    INVALID_DEPTH = "INVALID_DEPTH"
     UNFAVORABLE_PRICING = "UNFAVORABLE_PRICING"
     STALE_DATA = "STALE_DATA"
 
@@ -42,6 +44,9 @@ class OpportunityStatus(str, Enum):
     LIVE_STALE = "LIVE STALE"
     SIMULATED = "SIMULATED"
     HEDGE_INCOMPLETE = "HEDGE INCOMPLETE"
+    UNKNOWN_DEPTH = "UNKNOWN DEPTH"
+    INSUFFICIENT_DEPTH = "INSUFFICIENT DEPTH"
+    INVALID_DEPTH = "INVALID DEPTH"
     UNAVAILABLE = "UNAVAILABLE"
 
 
@@ -53,6 +58,8 @@ _MESSAGES = {
     DiagnosticCode.NO_STX_MARKETS: "No equivalent STX markets were found for the eligible events.",
     DiagnosticCode.INELIGIBLE: "Candidates exist but none satisfy the promotion's eligibility conditions.",
     DiagnosticCode.INSUFFICIENT_LIQUIDITY: "Matching markets exist but cannot be fully hedged at current STX depth.",
+    DiagnosticCode.UNKNOWN_DEPTH: "STX depth could not be independently verified; not treated as liquid.",
+    DiagnosticCode.INVALID_DEPTH: "STX order-book data was malformed and could not be interpreted.",
     DiagnosticCode.UNFAVORABLE_PRICING: "Matching markets exist but pricing is unfavorable.",
     DiagnosticCode.STALE_DATA: "Quotes are stale; refresh to get current prices.",
 }
@@ -66,16 +73,24 @@ class DiscoveryResult:
     message: str
     mode: str
     bookmaker_key: Optional[str] = None
+    diagnostic_recommendations: Tuple[Recommendation, ...] = ()
 
 
 def classify_recommendation(rec: Recommendation, mode: str) -> str:
     if rec.source_type != "LIVE":
         return OpportunityStatus.SIMULATED.value
-    if rec.stale:
+    if rec.stale or rec.depth_status == "STALE":
         return OpportunityStatus.LIVE_STALE.value
-    if not rec.fully_hedged:
-        return OpportunityStatus.HEDGE_INCOMPLETE.value
-    return OpportunityStatus.LIVE_VERIFIED.value
+    depth = rec.depth_status
+    if depth == "VERIFIED" and rec.fully_hedged:
+        return OpportunityStatus.LIVE_VERIFIED.value
+    if depth == "INSUFFICIENT":
+        return OpportunityStatus.INSUFFICIENT_DEPTH.value
+    if depth == "INVALID":
+        return OpportunityStatus.INVALID_DEPTH.value
+    if depth == "UNKNOWN" or depth == "":
+        return OpportunityStatus.UNKNOWN_DEPTH.value
+    return OpportunityStatus.HEDGE_INCOMPLETE.value
 
 
 def _eligible(promotion, opportunities):
@@ -143,7 +158,10 @@ def _discover(promotion, mode, stake, kind, book=None, exchange=None, routes=Non
 
 
 def _with_bookmaker(result, key):
-    return DiscoveryResult(result.recommendations, result.diagnostics, result.status, result.message, result.mode, key)
+    return DiscoveryResult(
+        result.recommendations, result.diagnostics, result.status, result.message,
+        result.mode, key, result.diagnostic_recommendations,
+    )
 
 
 def _rank(promotion, raw, kind, mode, amount):
@@ -153,24 +171,48 @@ def _rank(promotion, raw, kind, mode, amount):
         return DiscoveryResult((), (code.value,), OpportunityStatus.UNAVAILABLE.value, _MESSAGES[code], mode)
 
     if kind is BetKind.QUALIFYING:
-        recommendations = rank_qualifying_bets(promotion, eligible, max_results=4)
-        all_candidates = rank_qualifying_bets(promotion, eligible, max_results=1000)
+        all_candidates = rank_qualifying_bets(promotion, eligible, max_results=1000, require_hedged=False)
     else:
-        recommendations = rank_conversion_bets(amount, eligible, max_results=4, promotion=promotion)
-        all_candidates = rank_conversion_bets(amount, eligible, max_results=1000, promotion=promotion)
+        all_candidates = rank_conversion_bets(
+            amount, eligible, max_results=1000, promotion=promotion, require_hedged=False
+        )
 
-    if not recommendations:
-        # Distinguish insufficient liquidity from no matches.
+    if not all_candidates:
         code = DiagnosticCode.INSUFFICIENT_LIQUIDITY
         return DiscoveryResult((), (code.value,), OpportunityStatus.UNAVAILABLE.value, _MESSAGES[code], mode)
 
+    # In LIVE mode only genuinely verified depth is a primary recommendation.
+    # DEMO has no real book, so simulated hedgeability is acceptable (labeled).
+    def _is_primary(r):
+        if mode == "LIVE":
+            return r.depth_status == "VERIFIED" and r.fully_hedged
+        return r.fully_hedged
+
+    primary = [r for r in all_candidates if _is_primary(r)]
+    others = [r for r in all_candidates if not _is_primary(r)]
+
+    if not primary:
+        statuses = {r.depth_status for r in others}
+        if "INVALID" in statuses:
+            code = DiagnosticCode.INVALID_DEPTH
+        elif "INSUFFICIENT" in statuses:
+            code = DiagnosticCode.INSUFFICIENT_LIQUIDITY
+        elif "STALE" in statuses:
+            code = DiagnosticCode.STALE_DATA
+        else:
+            code = DiagnosticCode.UNKNOWN_DEPTH
+        return DiscoveryResult(
+            (), (code.value,), OpportunityStatus.UNAVAILABLE.value, _MESSAGES[code], mode,
+            diagnostic_recommendations=tuple(others[:4]),
+        )
+
     diagnostics = []
-    if any(r.stale for r in recommendations):
+    if any(r.stale for r in primary):
         diagnostics.append(DiagnosticCode.STALE_DATA.value)
-    status = classify_recommendation(recommendations[0], mode)
-    message = "OK"
+    status = classify_recommendation(primary[0], mode)
     return DiscoveryResult(
-        tuple(recommendations), tuple(diagnostics), status, message, mode
+        tuple(primary[:4]), tuple(diagnostics), status, "OK", mode,
+        diagnostic_recommendations=tuple(others[:4]),
     )
 
 

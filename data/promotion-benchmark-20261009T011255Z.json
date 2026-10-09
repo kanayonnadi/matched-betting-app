@@ -1,0 +1,14 @@
+{
+  "generated_at": "2026-10-09T01:12:55.133724+00:00",
+  "promotion": "Caesars Ontario Qualifying",
+  "sportsbook": "Caesars Ontario",
+  "mode": "LIVE",
+  "status": "UNAVAILABLE",
+  "bookmaker_key": null,
+  "diagnostics": [
+    "SPORTSBOOK_UNKNOWN"
+  ],
+  "message": "Sportsbook could not be identified from the promotion.",
+  "recommendations": [],
+  "diagnostic_recommendations": 0
+}

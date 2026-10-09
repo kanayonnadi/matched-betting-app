@@ -68,6 +68,14 @@ def _recommendation_card(rec, index, mode):
     if rec.slippage_pct is not None:
         status_line += f" · slippage `{rec.slippage_pct:.2f}%`"
     st.write(status_line)
+    st.write(
+        f"STX hedge: required `{rec.requested_contracts}` contracts · "
+        f"verified available `{rec.available_contracts}` · "
+        f"executable `{rec.executable_contracts}` · depth **{rec.depth_status or 'UNKNOWN'}**"
+    )
+    st.write(
+        f"Exchange capital `{_money(opp.lay_liability)}` · fees `{_money(opp.lay_fee or Decimal('0'))}`"
+    )
     st.caption(f"Source: {rec.source_type} · quote {rec.timestamp}")
     status = classify_recommendation(rec, mode)
     st.markdown(f"Status: **{status}**")
@@ -243,9 +251,22 @@ def _show_discovery(result):
         st.warning(f"{code}: {result.message}")
     if not result.recommendations:
         st.info(result.message)
-        return
     for index, rec in enumerate(result.recommendations, start=1):
         _recommendation_card(rec, index, result.mode)
+    diagnostic_recommendations = getattr(result, "diagnostic_recommendations", ()) or ()
+    if diagnostic_recommendations:
+        with st.expander(f"Diagnostics — {len(diagnostic_recommendations)} candidate(s) not eligible/verified"):
+            st.caption(
+                "These matched markets are NOT fully hedgeable at verified depth. "
+                "Shown for transparency, not as recommendations."
+            )
+            for rec in diagnostic_recommendations:
+                opp = rec.opportunity
+                st.write(
+                    f"- {opp.event_label} — {opp.selection} · depth "
+                    f"**{rec.depth_status or 'UNKNOWN'}** · required {rec.requested_contracts} · "
+                    f"available {rec.available_contracts}"
+                )
 
 
 def _find_qualifying(promotion, mode, force=False):

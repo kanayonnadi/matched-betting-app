@@ -1,0 +1,93 @@
+{
+  "generated_at": "2026-10-09T01:12:06.885252+00:00",
+  "provider_mode": "LIVE",
+  "exchange_mode": "LIVE",
+  "provenance": "live providers",
+  "stakes": [
+    {
+      "stake": "10",
+      "matched_markets": 96,
+      "verified_depth": 96,
+      "unknown_depth": 0,
+      "insufficient_depth": 0,
+      "stale_depth": 0,
+      "invalid_depth": 0,
+      "fully_hedgeable": 96,
+      "median_available_depth": "3070.00",
+      "median_executable_contracts": "17.1",
+      "median_slippage_pct": "0",
+      "max_slippage_pct": "0",
+      "median_exchange_capital": "7.77400",
+      "median_worst_case_ql": "-1.47400",
+      "liquidity_grades": {
+        "HIGH": 0,
+        "MEDIUM": 96,
+        "LOW": 0
+      }
+    },
+    {
+      "stake": "25",
+      "matched_markets": 96,
+      "verified_depth": 96,
+      "unknown_depth": 0,
+      "insufficient_depth": 0,
+      "stale_depth": 0,
+      "invalid_depth": 0,
+      "fully_hedgeable": 96,
+      "median_available_depth": "3070.00",
+      "median_executable_contracts": "42.75",
+      "median_slippage_pct": "0",
+      "max_slippage_pct": "0",
+      "median_exchange_capital": "19.435000",
+      "median_worst_case_ql": "-3.685000",
+      "liquidity_grades": {
+        "HIGH": 0,
+        "MEDIUM": 96,
+        "LOW": 0
+      }
+    },
+    {
+      "stake": "50",
+      "matched_markets": 96,
+      "verified_depth": 96,
+      "unknown_depth": 0,
+      "insufficient_depth": 0,
+      "stale_depth": 0,
+      "invalid_depth": 0,
+      "fully_hedgeable": 96,
+      "median_available_depth": "3070.00",
+      "median_executable_contracts": "85.5",
+      "median_slippage_pct": "0",
+      "max_slippage_pct": "0",
+      "median_exchange_capital": "38.87000",
+      "median_worst_case_ql": "-7.36000",
+      "liquidity_grades": {
+        "HIGH": 0,
+        "MEDIUM": 96,
+        "LOW": 0
+      }
+    },
+    {
+      "stake": "100",
+      "matched_markets": 96,
+      "verified_depth": 96,
+      "unknown_depth": 0,
+      "insufficient_depth": 0,
+      "stale_depth": 0,
+      "invalid_depth": 0,
+      "fully_hedgeable": 96,
+      "median_available_depth": "3070.00",
+      "median_executable_contracts": "171",
+      "median_slippage_pct": "0",
+      "max_slippage_pct": "0",
+      "median_exchange_capital": "77.7400",
+      "median_worst_case_ql": "-14.7100",
+      "liquidity_grades": {
+        "HIGH": 0,
+        "MEDIUM": 96,
+        "LOW": 0
+      }
+    }
+  ],
+  "status": "OK"
+}
