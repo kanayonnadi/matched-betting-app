@@ -9,8 +9,10 @@ from .base import (
 )
 from .cache import CachedProvider
 from .config import LiveOddsConfig, StxConfig
+from .bookmakers import CA_BOOKMAKER_KEYS, BookmakerResolution, resolve_bookmaker
 from .factory import (
     ProviderSet,
+    build_bookmaker_provider,
     build_exchange_provider,
     build_providers,
     build_sportsbook_provider,
@@ -66,6 +68,8 @@ __all__ = [
     "OddsProviderError",
     "ProviderSet",
     "ProviderUnavailableError",
+    "CA_BOOKMAKER_KEYS",
+    "BookmakerResolution",
     "DEFAULT_ROUTES",
     "SPORT_KEY_TO_SPORT",
     "STX_DEMO_CA",
@@ -79,6 +83,7 @@ __all__ = [
     "StxSigner",
     "THE_ODDS_API_BASE",
     "TheOddsApiProvider",
+    "build_bookmaker_provider",
     "build_exchange_provider",
     "build_providers",
     "build_sportsbook_provider",
@@ -86,6 +91,7 @@ __all__ = [
     "load_private_key",
     "normalize_sport_key",
     "parse_time",
+    "resolve_bookmaker",
     "routes_by_canonical",
     "select_routes",
 ]

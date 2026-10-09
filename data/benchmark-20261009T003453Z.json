@@ -1,0 +1,62 @@
+{
+  "generated_at": "2026-10-09T00:34:53.342383+00:00",
+  "stakes": [
+    {
+      "stake": "10",
+      "opportunities": 21,
+      "fully_hedgeable": 21,
+      "median_depth": "17.8",
+      "median_slippage_pct": "0",
+      "median_qualifying_loss": "1.13000",
+      "median_liability": "9.25600",
+      "liquidity_grades": {
+        "HIGH": 0,
+        "MEDIUM": 21,
+        "LOW": 0
+      }
+    },
+    {
+      "stake": "25",
+      "opportunities": 21,
+      "fully_hedgeable": 21,
+      "median_depth": "44.5",
+      "median_slippage_pct": "0",
+      "median_qualifying_loss": "2.820000",
+      "median_liability": "23.14000",
+      "liquidity_grades": {
+        "HIGH": 0,
+        "MEDIUM": 21,
+        "LOW": 0
+      }
+    },
+    {
+      "stake": "50",
+      "opportunities": 21,
+      "fully_hedgeable": 21,
+      "median_depth": "89",
+      "median_slippage_pct": "0",
+      "median_qualifying_loss": "5.64000",
+      "median_liability": "46.2800",
+      "liquidity_grades": {
+        "HIGH": 0,
+        "MEDIUM": 21,
+        "LOW": 0
+      }
+    },
+    {
+      "stake": "100",
+      "opportunities": 21,
+      "fully_hedgeable": 21,
+      "median_depth": "178",
+      "median_slippage_pct": "0",
+      "median_qualifying_loss": "11.2700",
+      "median_liability": "92.5600",
+      "liquidity_grades": {
+        "HIGH": 0,
+        "MEDIUM": 21,
+        "LOW": 0
+      }
+    }
+  ],
+  "status": "OK"
+}

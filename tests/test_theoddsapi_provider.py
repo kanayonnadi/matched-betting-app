@@ -176,6 +176,20 @@ def test_unexpected_payload_rejected():
         instance.get_events("basketball_nba")
 
 
+def test_invalid_prices_are_skipped():
+    event = dict(BASKETBALL_EVENT)
+    event["bookmakers"] = [
+        {"key": "fanduel", "markets": [{"key": "h2h", "outcomes": [
+            {"name": "Bad", "price": 1.0}, {"name": "Good", "price": 2.5},
+        ]}]}
+    ]
+    instance = provider([event])
+    instance.get_events("basketball_nba")
+    quotes = instance.get_odds("evt-1", "moneyline")
+    assert len(quotes) == 1
+    assert quotes[0].selection == "Good"
+
+
 def test_parse_time_handles_z_suffix():
     parsed = parse_time("2026-11-01T19:30:00Z")
     assert parsed.tzinfo is not None

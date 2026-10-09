@@ -10,6 +10,7 @@ own API key via configuration.
 """
 
 from datetime import datetime, timezone
+from decimal import Decimal
 from typing import Optional, Sequence
 
 import requests
@@ -231,6 +232,11 @@ class TheOddsApiProvider(OddsProvider):
             for outcome in raw_market["outcomes"]:
                 price = outcome.get("price")
                 if price is None:
+                    continue
+                try:
+                    if Decimal(str(price)) <= Decimal("1"):
+                        continue  # invalid/placeholder price; never fabricate
+                except Exception:  # noqa: BLE001
                     continue
                 quotes.append(
                     NormalizedOdds(

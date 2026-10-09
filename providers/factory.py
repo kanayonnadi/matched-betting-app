@@ -15,6 +15,7 @@ from typing import List, Optional
 from logging_config import get_logger
 
 from .aggregate import MultiSportsbookProvider
+from .base import ProviderUnavailableError
 from .config import LiveOddsConfig, StxConfig
 from .mock import MockExchangeProvider, MockSportsbookProvider
 from .stx import StxProvider
@@ -52,6 +53,21 @@ def build_sportsbook_provider(config: Optional[LiveOddsConfig] = None):
     if len(providers) == 1:
         return providers[0]
     return MultiSportsbookProvider(providers)
+
+
+def build_bookmaker_provider(bookmaker_key: str, config: Optional[LiveOddsConfig] = None):
+    """A sportsbook provider scoped to exactly one bookmaker (no substitution)."""
+    config = config or LiveOddsConfig.from_env()
+    if not config.api_key:
+        raise ProviderUnavailableError(
+            "The Odds API key is not configured; cannot fetch live odds."
+        )
+    return TheOddsApiProvider(
+        config.api_key,
+        bookmaker_key,
+        region=config.region or "ca",
+        markets=config.markets,
+    )
 
 
 def _resolve_private_key(path: str) -> str:

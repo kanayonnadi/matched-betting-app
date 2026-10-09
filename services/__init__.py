@@ -1,5 +1,13 @@
 """Application services (business logic independent of the UI)."""
 
+from .discovery import (
+    DiagnosticCode,
+    DiscoveryResult,
+    OpportunityStatus,
+    classify_recommendation,
+    discover_conversion,
+    discover_qualifying,
+)
 from .promotion_workflow import (
     MODES,
     LiveDataUnavailable,
@@ -20,9 +28,15 @@ from .workflow import WorkflowState, derive_state, progress_index, sync_workflow
 
 __all__ = [
     "MODES",
+    "DiagnosticCode",
+    "DiscoveryResult",
     "LiveDataUnavailable",
+    "OpportunityStatus",
     "Recommendation",
     "WorkflowState",
+    "classify_recommendation",
+    "discover_conversion",
+    "discover_qualifying",
     "calculate_net_profit",
     "confirm_qualifying_settlement",
     "confirm_reward_received",

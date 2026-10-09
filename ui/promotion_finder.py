@@ -23,13 +23,12 @@ from services import (
     LiveDataUnavailable,
     MODES,
     calculate_net_profit,
+    classify_recommendation,
     confirm_qualifying_settlement,
     confirm_reward_received,
-    find_conversion_bets,
-    find_qualifying_bets,
+    discover_conversion,
+    discover_qualifying,
     parse_promotion,
-    rank_conversion_bets,
-    rank_qualifying_bets,
     record_conversion_placed,
     record_qualifying_placed,
     save_promotion,
@@ -45,7 +44,7 @@ def _money(value) -> str:
     return f"${amount:,.2f}"
 
 
-def _recommendation_card(rec, index):
+def _recommendation_card(rec, index, mode):
     opp = rec.opportunity
     st.markdown(f"**#{index} · {opp.event_label} — {opp.selection}**")
     c1, c2 = st.columns(2)
@@ -70,15 +69,94 @@ def _recommendation_card(rec, index):
         status_line += f" · slippage `{rec.slippage_pct:.2f}%`"
     st.write(status_line)
     st.caption(f"Source: {rec.source_type} · quote {rec.timestamp}")
+    status = classify_recommendation(rec, mode)
+    st.markdown(f"Status: **{status}**")
     if flags:
         st.warning(" · ".join(flags))
-    else:
-        st.success("Fully hedged · fresh")
+
+
+def _dec(value):
+    value = str(value).strip()
+    if not value:
+        return None
+    try:
+        return Decimal(value)
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _detect_book(text):
+    from matching.normalize import normalize_name
+
+    normalized = normalize_name(text or "")
+    for candidate in (
+        "bet365", "betmgm", "sports interaction", "pointsbet", "proline", "olg",
+        "playnow", "betano", "bet99", "betrivers",
+    ):
+        if candidate in normalized:
+            return candidate
+    return None
+
+
+def _quick_input():
+    st.subheader("Paste your sportsbook promotion")
+    text = st.text_area(
+        "Promotion", height=110, key="pf_text",
+        placeholder="e.g. BetMGM Ontario: Bet $10, get a $20 free bet. Minimum odds 1.50. Ontario only.",
+    )
+    book_hint = st.text_input("Sportsbook (if not detected)", key="pf_book_hint")
+    if st.button("Find Opportunities", type="primary", key="pf_go"):
+        terms = parse_promotion(text)
+        book = book_hint.strip() or _detect_book(text)
+        missing = []
+        if not book:
+            missing.append("sportsbook")
+        if terms.qualifying_stake is None:
+            missing.append("qualifying stake")
+        if terms.reward_amount is None:
+            missing.append("reward amount")
+        st.session_state["pf_terms"] = terms
+        st.session_state["pf_book"] = book
+        if missing:
+            st.session_state["pf_missing"] = missing
+        else:
+            st.session_state.pop("pf_missing", None)
+            promotion_id = save_promotion(
+                terms, book, "promotion", jurisdiction="Ontario", terms_text=text
+            )
+            st.session_state["pf_selected"] = promotion_id
+            st.success(f"Saved promotion #{promotion_id}. Review conditions and find a bet below.")
+
+    missing = st.session_state.get("pf_missing")
+    if missing:
+        st.warning("Confirm missing/essential terms: " + ", ".join(missing))
+        terms = st.session_state.get("pf_terms")
+        cols = st.columns(3)
+        book_c = cols[0].text_input("Sportsbook", value=st.session_state.get("pf_book") or "")
+        stake_c = cols[1].text_input("Qualifying stake", value=str(terms.qualifying_stake) if terms and terms.qualifying_stake else "")
+        reward_c = cols[2].text_input("Reward amount", value=str(terms.reward_amount) if terms and terms.reward_amount else "")
+        if st.button("Confirm & save", key="pf_confirm_save"):
+            overrides = {
+                key: value
+                for key, value in (("qualifying_stake", _dec(stake_c)), ("reward_amount", _dec(reward_c)))
+                if value is not None
+            }
+            confirmed = parse_promotion(st.session_state.get("pf_text", ""), overrides)
+            if not book_c.strip():
+                st.error("Sportsbook is required (it must not be assumed).")
+            else:
+                promotion_id = save_promotion(
+                    confirmed, book_c.strip(), "promotion", jurisdiction="Ontario",
+                    terms_text=st.session_state.get("pf_text", ""),
+                )
+                st.session_state["pf_selected"] = promotion_id
+                st.session_state.pop("pf_missing", None)
+                st.success(f"Saved promotion #{promotion_id}.")
 
 
 def _enter_promotion():
-    st.subheader("1 · Enter the promotion")
-    with st.expander("Paste promotion text / enter details", expanded=True):
+    st.subheader("Advanced · edit structured promotion fields")
+    with st.expander("Manual entry / corrections", expanded=False):
         text = st.text_area("Promotion text", placeholder="Bet $10, get a $20 free bet. Minimum odds 1.50.")
         cols = st.columns(3)
         sportsbook = cols[0].text_input("Sportsbook")
@@ -145,28 +223,52 @@ def _promotion_selector():
         st.info("No promotions saved yet. Enter one above.")
         return None, None
     options = {f"#{r['id']} {r['sportsbook']} — {r['name']}": r["id"] for r in rows}
-    label = st.selectbox("Promotion", list(options))
+    keys = list(options)
+    default_index = 0
+    selected = st.session_state.get("pf_selected")
+    if selected is not None:
+        for index, key in enumerate(keys):
+            if options[key] == selected:
+                default_index = index
+                break
+    label = st.selectbox("Promotion", keys, index=default_index)
     promotion = promotion_from_row(get_promotion(options[label]))
     state = sync_workflow(promotion.id)
     st.caption(f"Workflow: **{state}** · eligibility: {promotion.eligibility}")
     return promotion, rows
 
 
-def _find_qualifying(promotion, mode):
+def _show_discovery(result):
+    for code in result.diagnostics:
+        st.warning(f"{code}: {result.message}")
+    if not result.recommendations:
+        st.info(result.message)
+        return
+    for index, rec in enumerate(result.recommendations, start=1):
+        _recommendation_card(rec, index, result.mode)
+
+
+def _find_qualifying(promotion, mode, force=False):
     st.subheader("2 · Find a qualifying bet")
-    if st.button("Find qualifying odds", key="pf_find_q"):
+    if st.button("Find qualifying opportunities", key="pf_find_q") or force:
         try:
-            opportunities = find_qualifying_bets(promotion, mode)
-            st.session_state["pf_q"] = rank_qualifying_bets(promotion, opportunities)
+            result = discover_qualifying(promotion, mode)
         except LiveDataUnavailable as exc:
             st.error(str(exc))
-            st.session_state["pf_q"] = []
-    recommendations = st.session_state.get("pf_q")
+            return
+        st.session_state["pf_q_result"] = result
+        st.session_state["pf_q"] = list(result.recommendations)
+    result = st.session_state.get("pf_q_result")
+    recommendations = st.session_state.get("pf_q") or []
+    if result is not None:
+        _show_discovery(result)
     if not recommendations:
-        st.caption("No qualifying recommendations yet (or none fully hedged).")
+        if result is None:
+            st.caption("No qualifying opportunities yet. Click Find qualifying opportunities.")
         return
     for index, rec in enumerate(recommendations, start=1):
-        _recommendation_card(rec, index)
+        if not rec.fully_hedged:
+            continue
         if st.button(f"I placed wager #{index}", key=f"pf_q_place_{index}"):
             bet_id = record_qualifying_placed(promotion.id, rec.opportunity)
             st.success(f"Recorded as bet #{bet_id} (capital reserved). Place the wagers manually.")
@@ -242,19 +344,22 @@ def _find_conversion(promotion, mode):
     token_map = {f"#{t['id']} (${t['face_value']})": t for t in available}
     label = st.selectbox("Token", list(token_map))
     token = token_map[label]
-    if st.button("Find conversion odds", key="pf_find_c"):
+    if st.button("Find conversion opportunities", key="pf_find_c"):
         try:
-            opportunities = find_conversion_bets(promotion, token["face_value"], mode)
-            st.session_state["pf_c"] = rank_conversion_bets(token["face_value"], opportunities)
+            result = discover_conversion(promotion, token["face_value"], mode)
         except LiveDataUnavailable as exc:
             st.error(str(exc))
-            st.session_state["pf_c"] = []
-    recommendations = st.session_state.get("pf_c")
+            return
+        st.session_state["pf_c_result"] = result
+        st.session_state["pf_c"] = list(result.recommendations)
+    result = st.session_state.get("pf_c_result")
+    recommendations = st.session_state.get("pf_c") or []
+    if result is not None:
+        _show_discovery(result)
     if not recommendations:
-        st.caption("No conversion recommendations yet.")
         return
     for index, rec in enumerate(recommendations, start=1):
-        _recommendation_card(rec, index)
+        _recommendation_card(rec, index, mode)
         rate = rec.opportunity.conversion_rate
         if rate is not None:
             st.write(f"Estimated conversion: `{rate:.1f}%` · guaranteed value `{_money(rec.opportunity.expected_profit)}`")
@@ -283,6 +388,7 @@ def render():
     if mode == "LIVE":
         st.caption("LIVE mode uses The Odds API + production STX (consumes API quota). No mock fallback.")
 
+    _quick_input()
     _enter_promotion()
     promotion, _rows = _promotion_selector()
     if promotion is None:
