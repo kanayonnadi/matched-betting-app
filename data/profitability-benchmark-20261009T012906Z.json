@@ -1,0 +1,166 @@
+{
+  "generated_at": "2026-10-09T01:29:06.298859+00:00",
+  "mode": "LIVE",
+  "provenance": "live providers",
+  "promotions": [
+    {
+      "evaluation": {
+        "promotion_id": null,
+        "sportsbook": "PointsBet Ontario",
+        "name": "HISTORICAL fixture - new-customer bet-get (SNR)",
+        "mode": "LIVE",
+        "reward_type": "FREE_BET_SNR",
+        "reward_amount": "20",
+        "reward_count": 1,
+        "stake_returned": false,
+        "terms_verified": true,
+        "eligible": true,
+        "eligibility_state": "VERIFIED ELIGIBLE",
+        "conversion_supported": true,
+        "conversion_note": "Conversion supported (stake-not-returned free bet on moneyline).",
+        "conversion_preview": true,
+        "reward_confirmed": false,
+        "status": "PROJECTED PROFITABLE",
+        "projected_profitable": true,
+        "qualifying": {
+          "found": true,
+          "back_stake": "10.0",
+          "back_odds": "1.53",
+          "lay_stake": "9.48600",
+          "lay_liability": "5.81400",
+          "lay_fee": "0.37",
+          "worst_case": "-0.88400",
+          "best_case": "-0.88400",
+          "conversion_rate": null,
+          "exchange_capital": "5.81400",
+          "depth_status": "VERIFIED",
+          "fully_hedged": true,
+          "stale": false,
+          "source_type": "LIVE"
+        },
+        "conversion": {
+          "found": true,
+          "back_stake": "20.0",
+          "back_odds": "4.1",
+          "lay_stake": "12.4000",
+          "lay_liability": "49.6000",
+          "lay_fee": "1.00",
+          "worst_case": "11.4000",
+          "best_case": "11.4000",
+          "conversion_rate": "57.000",
+          "exchange_capital": "49.6000",
+          "depth_status": "VERIFIED",
+          "fully_hedged": true,
+          "stale": false,
+          "source_type": "LIVE"
+        },
+        "qualifying_capital": "15.81400",
+        "conversion_capital": "49.6000",
+        "peak_capital": "65.41400",
+        "turnover": "31.88600",
+        "worst_case_total": "10.51600",
+        "best_case_total": "10.51600",
+        "projected_total": "10.51600",
+        "expected_value": null,
+        "roi_on_capital": "16.07606934295410768337053230",
+        "warnings": [
+          "conversion is a current-price preview, not a guarantee"
+        ]
+      },
+      "qualifying_discovery": {
+        "status": "LIVE VERIFIED",
+        "message": "OK",
+        "diagnostics": [],
+        "recommendations": 4,
+        "diagnostic_recommendations": 0
+      },
+      "conversion_discovery": {
+        "status": "LIVE VERIFIED",
+        "message": "OK",
+        "diagnostics": [],
+        "recommendations": 4,
+        "diagnostic_recommendations": 0
+      }
+    },
+    {
+      "evaluation": {
+        "promotion_id": null,
+        "sportsbook": "BetMGM Ontario",
+        "name": "HISTORICAL fixture - new-customer bet-get (SNR)",
+        "mode": "LIVE",
+        "reward_type": "FREE_BET_SNR",
+        "reward_amount": "20",
+        "reward_count": 1,
+        "stake_returned": false,
+        "terms_verified": true,
+        "eligible": true,
+        "eligibility_state": "VERIFIED ELIGIBLE",
+        "conversion_supported": true,
+        "conversion_note": "Conversion supported (stake-not-returned free bet on moneyline).",
+        "conversion_preview": true,
+        "reward_confirmed": false,
+        "status": "PROJECTED PROFITABLE",
+        "projected_profitable": true,
+        "qualifying": {
+          "found": true,
+          "back_stake": "10.0",
+          "back_odds": "1.71",
+          "lay_stake": "9.40500",
+          "lay_liability": "7.69500",
+          "lay_fee": "0.43",
+          "worst_case": "-1.02500",
+          "best_case": "-1.02500",
+          "conversion_rate": null,
+          "exchange_capital": "7.69500",
+          "depth_status": "VERIFIED",
+          "fully_hedged": true,
+          "stale": false,
+          "source_type": "LIVE"
+        },
+        "conversion": {
+          "found": true,
+          "back_stake": "20.0",
+          "back_odds": "4.1",
+          "lay_stake": "12.4000",
+          "lay_liability": "49.6000",
+          "lay_fee": "1.00",
+          "worst_case": "11.4000",
+          "best_case": "11.4000",
+          "conversion_rate": "57.000",
+          "exchange_capital": "49.6000",
+          "depth_status": "VERIFIED",
+          "fully_hedged": true,
+          "stale": false,
+          "source_type": "LIVE"
+        },
+        "qualifying_capital": "17.69500",
+        "conversion_capital": "49.6000",
+        "peak_capital": "67.29500",
+        "turnover": "31.80500",
+        "worst_case_total": "10.37500",
+        "best_case_total": "10.37500",
+        "projected_total": "10.37500",
+        "expected_value": null,
+        "roi_on_capital": "15.41719295638606137157292518",
+        "warnings": [
+          "conversion is a current-price preview, not a guarantee"
+        ]
+      },
+      "qualifying_discovery": {
+        "status": "LIVE VERIFIED",
+        "message": "OK",
+        "diagnostics": [],
+        "recommendations": 4,
+        "diagnostic_recommendations": 0
+      },
+      "conversion_discovery": {
+        "status": "LIVE VERIFIED",
+        "message": "OK",
+        "diagnostics": [],
+        "recommendations": 4,
+        "diagnostic_recommendations": 0
+      }
+    }
+  ],
+  "status": "OK"
+}

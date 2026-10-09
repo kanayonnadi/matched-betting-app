@@ -1,0 +1,20 @@
+{
+  "label": "HISTORICAL FIXTURE - clearly-labelled, representative terms. NOT an active or current offer.",
+  "note": "These terms are a historical/illustrative bet-get promotion used only to exercise the M25 end-to-end profitability benchmark against live odds. Replace with a user-supplied real promotion before acting on any result.",
+  "promotions": [
+    {
+      "name": "HISTORICAL fixture - new-customer bet-get (SNR)",
+      "sportsbook": "PointsBet Ontario",
+      "text": "Bet $10, get a $20 free bet. Minimum odds 1.50. Stake not returned. Ontario only.",
+      "status": "TERMS_VERIFIED",
+      "eligibility": "Eligible"
+    },
+    {
+      "name": "HISTORICAL fixture - new-customer bet-get (SNR)",
+      "sportsbook": "BetMGM Ontario",
+      "text": "Bet $10, get a $20 free bet. Minimum odds 1.50. Stake not returned. Ontario only.",
+      "status": "TERMS_VERIFIED",
+      "eligibility": "Eligible"
+    }
+  ]
+}

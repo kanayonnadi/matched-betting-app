@@ -27,6 +27,7 @@ from services import (
     confirm_qualifying_settlement,
     confirm_reward_received,
     discover_conversion,
+    discover_profitability,
     discover_qualifying,
     parse_promotion,
     record_conversion_placed,
@@ -269,6 +270,139 @@ def _show_discovery(result):
                 )
 
 
+def _bankroll_available():
+    try:
+        from database import list_bankroll, list_reservations
+        from risk import available_capital
+
+        state = available_capital(list_bankroll(), list_reservations(status="RESERVED"))
+        return state.available
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _status_badge(is_live, preview, confirmed):
+    bits = []
+    bits.append("LIVE VERIFIED" if is_live else "SIMULATED")
+    if confirmed:
+        bits.append("reward confirmed")
+    elif preview:
+        bits.append("conversion preview")
+    return " · ".join(bits)
+
+
+def _show_profitability(promotion, evaluation, qualifying_result, conversion_result):
+    q = evaluation.qualifying
+    c = evaluation.conversion
+    reward = evaluation.reward_amount
+    st.markdown(
+        f"**Promotion:** {promotion.sportsbook} — Bet {_money(q.back_stake)}, "
+        f"receive {_money(reward)} free bet"
+        + (" ×{0}".format(evaluation.reward_count) if evaluation.reward_count > 1 else "")
+    )
+    st.caption(
+        _status_badge(
+            promotion.eligibility == "Eligible",
+            evaluation.conversion_preview,
+            evaluation.reward_confirmed,
+        )
+        + f" · {evaluation.status}"
+    )
+
+    st.markdown("**Qualifying bet**")
+    if q.found:
+        a, b, cc = st.columns(3)
+        a.write(f"Book: `{q.opportunity.book_provider}`")
+        a.write(f"Stake: `{_money(q.back_stake)}` @ `{q.back_odds:.2f}`")
+        b.write(f"STX hedge: `{_money(q.lay_stake)}` @ `{q.opportunity.lay_odds:.3f}`")
+        b.write(f"Exchange capital: `{_money(q.exchange_capital)}`")
+        cc.metric("Worst-case loss", _money(q.worst_case))
+        cc.write(f"Fee: `{_money(q.lay_fee)}` · depth **{q.depth_status or 'UNKNOWN'}**")
+    else:
+        st.info("No qualifying bet found.")
+
+    st.markdown("**Estimated free-bet conversion**")
+    if c.found and evaluation.conversion_supported:
+        a, b, cc = st.columns(3)
+        a.write(f"Free bet: `{_money(c.back_stake)}`")
+        rate = c.conversion_rate
+        a.write(f"Conversion: `{rate:.1f}%`" if rate is not None else "Conversion: n/a")
+        b.write(f"STX hedge: `{_money(c.lay_stake)}`")
+        b.write(f"Exchange capital: `{_money(c.exchange_capital)}`")
+        cc.metric("Projected conversion profit", _money(c.worst_case))
+        cc.write(f"Fee: `{_money(c.lay_fee)}` · depth **{c.depth_status or 'UNKNOWN'}**")
+    else:
+        st.warning(evaluation.conversion_note)
+
+    st.markdown("**Total projected promotion result**")
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric(
+        "Worst-case profit",
+        _money(evaluation.worst_case_total) if evaluation.worst_case_total is not None else "—",
+    )
+    m2.metric(
+        "Best-case profit",
+        _money(evaluation.best_case_total) if evaluation.best_case_total is not None else "—",
+    )
+    m3.metric("Required exchange capital", _money(evaluation.peak_capital))
+    m4.metric(
+        "ROI on capital",
+        f"{evaluation.roi_on_capital:.1f}%" if evaluation.roi_on_capital is not None else "—",
+    )
+    if evaluation.expected_value is None:
+        st.caption(
+            "No probability model: worst/best case are the two hedge outcomes, not an "
+            "expected value. Conversion prices are a preview and must be re-fetched after "
+            "the reward is credited."
+        )
+    else:
+        st.caption(f"Expected value (caller model): {_money(evaluation.expected_value)}")
+    if evaluation.projected_profitable:
+        st.success("Projected profitable after fees — complete calculation supported.")
+    else:
+        st.warning("Not shown as a profitable promotion: " + "; ".join(evaluation.warnings))
+
+    if evaluation.warnings:
+        with st.expander("Profitability warnings"):
+            for warning in evaluation.warnings:
+                st.write(f"- {warning}")
+    with st.expander("Detailed qualifying diagnostics"):
+        _show_discovery(qualifying_result)
+    with st.expander("Detailed conversion diagnostics (preview)"):
+        _show_discovery(conversion_result)
+
+
+def _profitability_summary(promotion, mode, force=False):
+    st.subheader("1 · Projected promotion profitability")
+    if st.button("Evaluate complete promotion profitability", key="pf_prof", type="primary") or force:
+        try:
+            evaluation, q_result, c_result = discover_profitability(
+                promotion, mode, balances=_bankroll_available()
+            )
+        except LiveDataUnavailable as exc:
+            st.error(str(exc))
+            return
+        st.session_state["pf_prof"] = evaluation
+        st.session_state["pf_prof_q"] = q_result
+        st.session_state["pf_prof_c"] = c_result
+        st.session_state["pf_prof_id"] = promotion.id
+    evaluation = st.session_state.get("pf_prof")
+    if evaluation is None or st.session_state.get("pf_prof_id") != promotion.id:
+        evaluation = None
+    if evaluation is None:
+        st.caption(
+            "Runs the live qualifying search and a conversion preview in one step. "
+            "Nothing is wagered."
+        )
+        return
+    _show_profitability(
+        promotion,
+        evaluation,
+        st.session_state.get("pf_prof_q"),
+        st.session_state.get("pf_prof_c"),
+    )
+
+
 def _find_qualifying(promotion, mode, force=False):
     st.subheader("2 · Find a qualifying bet")
     if st.button("Find qualifying opportunities", key="pf_find_q") or force:
@@ -420,6 +554,7 @@ def render():
     promotion, _rows = _promotion_selector()
     if promotion is None:
         return
+    _profitability_summary(promotion, mode)
     _find_qualifying(promotion, mode)
     _confirm_steps(promotion)
     _find_conversion(promotion, mode)

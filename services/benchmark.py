@@ -176,5 +176,74 @@ def run_promotion_benchmark(
     return _write(payload, "promotion-benchmark", output_dir) if save else payload
 
 
+def _diagnostics_payload(result) -> dict:
+    return {
+        "status": result.status,
+        "message": result.message,
+        "diagnostics": list(result.diagnostics),
+        "recommendations": len(result.recommendations),
+        "diagnostic_recommendations": len(result.diagnostic_recommendations or ()),
+    }
+
+
+def run_profitability_benchmark(
+    promotions, mode="LIVE", output_dir="data", balances=None, save=True
+) -> dict:
+    """Read-only end-to-end promotion profitability benchmark (M25, Phase 6).
+
+    Accepts one promotion or a sequence. Runs the production discovery pipeline
+    for the qualifying and conversion legs, computes the complete projected
+    profitability, and records rejection reasons. Never places wagers.
+    """
+    if not isinstance(promotions, (list, tuple)):
+        promotions = [promotions]
+
+    from services.profitability import discover_profitability
+
+    if mode == "LIVE":
+        from env import load_env
+
+        load_env()
+
+    entries = []
+    blocked_reason = None
+    for promotion in promotions:
+        try:
+            evaluation, q_result, c_result = discover_profitability(
+                promotion, mode, balances=balances
+            )
+        except Exception as exc:  # noqa: BLE001
+            blocked_reason = str(exc)
+            entries.append(
+                {
+                    "promotion": getattr(promotion, "name", ""),
+                    "sportsbook": getattr(promotion, "sportsbook", ""),
+                    "status": "BLOCKED",
+                    "reason": str(exc),
+                }
+            )
+            continue
+        entries.append(
+            {
+                "evaluation": evaluation.to_dict(),
+                "qualifying_discovery": _diagnostics_payload(q_result),
+                "conversion_discovery": _diagnostics_payload(c_result),
+            }
+        )
+
+    payload = {
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "mode": mode,
+        "provenance": "live providers" if mode == "LIVE" else "simulated providers",
+        "promotions": entries,
+    }
+    if blocked_reason and all(e.get("status") == "BLOCKED" for e in entries):
+        payload["status"] = "BLOCKED"
+        payload["reason"] = blocked_reason
+    else:
+        payload["status"] = "OK"
+    return _write(payload, "profitability-benchmark", output_dir) if save else payload
+
+
 if __name__ == "__main__":
     print(json.dumps(run_live_benchmark(), indent=2))
