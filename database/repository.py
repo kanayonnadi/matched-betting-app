@@ -339,8 +339,9 @@ def create_promotion(promotion, db_path=DB_PATH) -> int:
              reward_count,stake_returned,reward_expiry_days,source_url,terms_text,status,
              confidence,eligibility,expires_at,lifecycle_status,official_source_url,
              terms_source_url,terms_verified_at,effective_date,withdrawal_restrictions,
-             wagering_requirement_text,min_deposit,max_qualifying_stake)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+             wagering_requirement_text,min_deposit,max_qualifying_stake,eligible_markets,
+             pre_match_only)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (
                 now, now,
                 getattr(promotion, "sportsbook", None),
@@ -371,6 +372,8 @@ def create_promotion(promotion, db_path=DB_PATH) -> int:
                 getattr(promotion, "wagering_requirement_text", None),
                 _float(getattr(promotion, "min_deposit", None)),
                 _float(getattr(promotion, "max_qualifying_stake", None)),
+                ",".join(getattr(promotion, "eligible_markets", ()) or ()),
+                _bool_int(getattr(promotion, "pre_match_only", None)),
             ),
         )
         return int(cursor.lastrowid)
@@ -405,7 +408,7 @@ def update_promotion(promotion_id, db_path=DB_PATH, **fields) -> None:
         "terms_text", "official_source_url", "terms_source_url", "terms_verified_at",
         "effective_date", "withdrawal_restrictions", "wagering_requirement_text",
         "min_deposit", "max_qualifying_stake", "expires_at", "status", "lifecycle_status",
-        "eligibility", "workflow_state",
+        "eligibility", "workflow_state", "eligible_markets", "pre_match_only",
     }
     updates = {}
     for key, value in fields.items():

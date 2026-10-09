@@ -5,7 +5,7 @@ liquidity/risk and bankroll components. UI calls these functions rather than
 duplicating business logic.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Optional
@@ -68,6 +68,8 @@ class Recommendation:
     timestamp: Optional[datetime]
     source_type: str
     stale: bool
+    eligibility: str = ""
+    provenance: dict = field(default_factory=dict)
 
 
 def _kw(db_path):
@@ -168,7 +170,44 @@ def find_conversion_bets(promotion: Promotion, token_amount, mode: str, force=Fa
     return list(discover_mock_opportunities(stake, kind=BetKind.FREE_BET_SNR))
 
 
-def _recommendation(opportunity) -> Recommendation:
+def _provenance_summary(opportunity) -> dict:
+    prov = getattr(opportunity, "provenance", None)
+    execution = getattr(opportunity, "execution", None)
+    summary = {"source_type": getattr(opportunity, "source_type", "MOCK")}
+    if prov is not None:
+        summary.update(
+            {
+                "source_mode": "LIVE" if getattr(prov, "is_live", False) else "DEMO",
+                "sportsbook_provider": getattr(prov, "sportsbook_provider", None),
+                "exchange_provider": getattr(prov, "exchange_provider", None),
+                "market_id": getattr(prov, "market_id", None),
+                "selection_id": getattr(prov, "selection_id", None),
+                "quote_timestamp": str(getattr(prov, "sportsbook_quote_timestamp", None)),
+                "order_book_timestamp": str(getattr(prov, "exchange_book_timestamp", None)),
+                "liquidity_snapshot_id": getattr(prov, "liquidity_snapshot_id", None),
+            }
+        )
+    if execution is not None:
+        summary.update(
+            {
+                "depth_levels_consumed": getattr(execution, "levels_consumed", None),
+                "effective_lay_odds": str(getattr(execution, "effective_lay_odds", None)),
+                "estimated_fee": str(getattr(execution, "estimated_fee", None)),
+                "depth_completeness": getattr(execution, "completeness", "UNKNOWN"),
+                "book_age_seconds": str(getattr(execution, "book_age_seconds", None)),
+                "fee_model": "per_wager",
+                "fee_model_status": "EXTERNALLY_UNVERIFIED",
+            }
+        )
+    return summary
+
+
+def _recommendation(opportunity, promotion=None) -> Recommendation:
+    eligibility = ""
+    if promotion is not None:
+        from promotions import evaluate_eligibility
+
+        eligibility = evaluate_eligibility(promotion, opportunity).state
     return Recommendation(
         opportunity=opportunity,
         worst_case_pnl=min(opportunity.profit_if_back, opportunity.profit_if_lay),
@@ -183,6 +222,8 @@ def _recommendation(opportunity) -> Recommendation:
         timestamp=opportunity.timestamp,
         source_type=getattr(opportunity, "source_type", "MOCK"),
         stale=is_stale(opportunity.timestamp),
+        eligibility=eligibility,
+        provenance=_provenance_summary(opportunity),
     )
 
 
@@ -192,8 +233,8 @@ def rank_qualifying_bets(promotion: Promotion, opportunities, max_results=4):
         for c in best_qualifying(promotion, opportunities, limit=100)
     ]
     # Reject insufficient-liquidity opportunities.
-    executable = [o for o in candidates if _recommendation(o).fully_hedged]
-    recommendations = [_recommendation(o) for o in executable]
+    executable = [o for o in candidates if _recommendation(o, promotion).fully_hedged]
+    recommendations = [_recommendation(o, promotion) for o in executable]
     recommendations.sort(
         key=lambda r: (
             r.opportunity.qualifying_loss,
@@ -204,15 +245,15 @@ def rank_qualifying_bets(promotion: Promotion, opportunities, max_results=4):
     return recommendations[:max_results]
 
 
-def rank_conversion_bets(token_amount, opportunities, max_results=4):
+def rank_conversion_bets(token_amount, opportunities, max_results=4, promotion=None):
     def conversion_value(opportunity):
         return opportunity.expected_profit
 
     executable = [
         o for o in opportunities
-        if o.kind is BetKind.FREE_BET_SNR and _recommendation(o).fully_hedged
+        if o.kind is BetKind.FREE_BET_SNR and _recommendation(o, promotion).fully_hedged
     ]
-    recommendations = [_recommendation(o) for o in executable]
+    recommendations = [_recommendation(o, promotion) for o in executable]
     recommendations.sort(key=lambda r: conversion_value(r.opportunity), reverse=True)
     return recommendations[:max_results]
 

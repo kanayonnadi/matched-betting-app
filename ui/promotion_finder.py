@@ -276,62 +276,64 @@ def _find_qualifying(promotion, mode, force=False):
 
 
 def _confirm_steps(promotion):
-    st.subheader("3 · Confirm outcome & reward")
-    bet_id = st.number_input(
-        "Qualifying bet ID", min_value=1, step=1,
-        value=int(st.session_state.get("pf_last_q_bet", 1)),
-        key="pf_settle_bet",
-    )
-    cols = st.columns(3)
-    outcome = cols[0].selectbox("Settled outcome", OUTCOMES, key="pf_outcome")
-    fee = cols[1].text_input("Actual STX fee")
-    pnl = cols[2].text_input("Actual total P&L")
-    if st.button("Confirm qualifying settlement", key="pf_confirm_settle"):
-        actual = None
-        if fee.strip() or pnl.strip():
-            from settlement import ActualSettlement
+    st.subheader("3 · Confirm placement, outcome & reward")
+    last_bet = st.session_state.get("pf_last_q_bet")
 
-            actual = ActualSettlement(
-                bet_id=int(bet_id), outcome=outcome,
-                actual_exchange_fee=Decimal(fee) if fee.strip() else None,
-                actual_total_pnl=Decimal(pnl) if pnl.strip() else None,
-            )
-        result = confirm_qualifying_settlement(int(bet_id), outcome, actual)
-        st.success(f"{result.status}: {result.message}")
+    if st.button("I placed the sportsbook bet + STX hedge", key="pf_hedge_placed"):
+        if last_bet is None:
+            st.error("Record a recommended wager first (section 2).")
+        else:
+            st.success("Placement noted (both sides). Confirm settlement once resolved.")
 
-    st.write("**Confirm reward received**")
-    tokens = list_reward_tokens(promotion.id)
-    if tokens:
-        st.dataframe(
-            [{"Token": t["id"], "Face": t["face_value"], "Type": t["reward_type"], "Status": t["status"]} for t in tokens]
-        )
-        token_ids = st.text_input("Token IDs to mark received (comma separated)", key="pf_tokens")
-        if st.button("Confirm reward received", key="pf_reward"):
-            ids = [int(x) for x in token_ids.split(",") if x.strip().isdigit()]
-            if ids:
-                confirm_reward_received(promotion.id, ids)
-                st.success("Reward tokens marked received.")
+    if last_bet is None:
+        st.caption("Confirm a recommended qualifying wager in section 2 to enable settlement confirmation.")
     else:
+        cols = st.columns(3)
+        outcome = cols[0].selectbox("Settled outcome", OUTCOMES, key="pf_outcome")
+        fee = cols[1].text_input("Actual STX fee (optional)")
+        pnl = cols[2].text_input("Actual total P&L (optional)")
+        if st.button("Qualifying bet settled", key="pf_confirm_settle"):
+            actual = None
+            if fee.strip() or pnl.strip():
+                from settlement import ActualSettlement
+
+                actual = ActualSettlement(
+                    bet_id=int(last_bet), outcome=outcome,
+                    actual_exchange_fee=Decimal(fee) if fee.strip() else None,
+                    actual_total_pnl=Decimal(pnl) if pnl.strip() else None,
+                )
+            result = confirm_qualifying_settlement(int(last_bet), outcome, actual)
+            st.success(f"{result.status}: {result.message}")
+
+    st.write("**Free bet received**")
+    tokens = list_reward_tokens(promotion.id)
+    pending = [t for t in tokens if t["status"] == "PENDING"]
+    if not tokens:
         cols2 = st.columns(2)
-        count = cols2[0].number_input("Tokens to create", min_value=1, value=int(promotion.reward_count or 1), key="pf_tokcount")
-        if cols2[1].button("Create & mark received", key="pf_create_tokens"):
+        count = cols2[0].number_input(
+            "Reward tokens", min_value=1, value=int(promotion.reward_count or 1), key="pf_tokcount"
+        )
+        if cols2[1].button("Create reward tokens", key="pf_create_tokens"):
             if promotion.reward_amount is None:
                 st.error("Reward amount unknown.")
             else:
-                ids = []
                 for index in range(int(count)):
-                    ids.append(
-                        create_reward_token(
-                            RewardToken(
-                                promotion_id=promotion.id,
-                                token_key=f"auto-{promotion.id}-{index}",
-                                face_value=promotion.reward_token_amount,
-                                reward_type=promotion.reward_type or "FREE_BET_SNR",
-                            )
+                    create_reward_token(
+                        RewardToken(
+                            promotion_id=promotion.id,
+                            token_key=f"auto-{promotion.id}-{index}",
+                            face_value=promotion.reward_token_amount,
+                            reward_type=promotion.reward_type or "FREE_BET_SNR",
                         )
                     )
-                confirm_reward_received(promotion.id, ids)
-                st.success("Reward tokens created and marked received.")
+                st.success("Reward tokens created (pending).")
+    else:
+        st.dataframe(
+            [{"Face": t["face_value"], "Type": t["reward_type"], "Status": t["status"]} for t in tokens]
+        )
+        if pending and st.button("Free bet received", key="pf_reward"):
+            confirm_reward_received(promotion.id, [t["id"] for t in pending])
+            st.success("Reward marked received.")
 
 
 def _find_conversion(promotion, mode):
@@ -373,9 +375,13 @@ def _result(promotion):
     net = calculate_net_profit(promotion.id)
     cols = st.columns(4)
     cols[0].metric("Qualifying loss", _money(net["qualifying_loss"]))
-    cols[1].metric("Conversion (settled)", _money(net["realized_conversion"]))
-    cols[2].metric("Net realized", _money(net["realized_net"]))
+    cols[1].metric("Projected (placed, pending)", _money(net["pending_conversion"]))
+    cols[2].metric("Realized (settled)", _money(net["realized_net"]))
     cols[3].metric("Outstanding liability", _money(net["outstanding_liability"]))
+    st.caption(
+        "Projected = current quotes (estimate). Realized = confirmed settlements only. "
+        "Locked-in = outcome P&L from confirmed fills (shown per recommendation)."
+    )
 
 
 def render():

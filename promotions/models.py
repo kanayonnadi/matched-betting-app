@@ -102,7 +102,9 @@ class Promotion:
     stake_returned: Optional[bool] = None
     reward_expiry_days: Optional[int] = None
     eligible_sports: Tuple[str, ...] = ()
+    eligible_markets: Tuple[str, ...] = ()
     excluded_markets: Tuple[str, ...] = ()
+    pre_match_only: Optional[bool] = None
     deposit_requirement: Optional[Decimal] = None
     source_url: Optional[str] = None
     terms_text: Optional[str] = None

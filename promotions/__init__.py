@@ -22,6 +22,11 @@ from .auto_lifecycle import (
     sync_promotion_lifecycle,
     terms_complete,
 )
+from .eligibility import (
+    EligibilityResult,
+    EligibilityState,
+    evaluate_eligibility,
+)
 from .from_row import promotion_from_row
 from .lifecycle import (
     ALLOWED_TRANSITIONS,
@@ -86,8 +91,11 @@ __all__ = [
     "TERMINAL_STATES",
     "Candidate",
     "CandidateStatus",
+    "EligibilityResult",
+    "EligibilityState",
     "EligibilityStatus",
     "PromotionEvaluation",
+    "evaluate_eligibility",
     "PromotionFacts",
     "ManualPromotionProvider",
     "Promotion",

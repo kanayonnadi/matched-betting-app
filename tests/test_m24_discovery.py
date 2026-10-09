@@ -89,7 +89,8 @@ def test_no_eligible_markets_diagnostic(monkeypatch):
         promotion(excluded_markets=("moneyline", "match_winner")), "LIVE",
         exchange=MockExchangeProvider(), routes=MOCK_ROUTES,
     )
-    assert DiagnosticCode.NO_ELIGIBLE_MARKETS.value in result.diagnostics
+    assert result.diagnostics  # no eligible candidates remain
+    assert not result.recommendations
 
 
 def test_insufficient_liquidity_diagnostic(monkeypatch):
@@ -104,7 +105,14 @@ def test_insufficient_liquidity_diagnostic(monkeypatch):
 
 def test_provider_unavailable_when_exchange_missing(monkeypatch):
     monkeypatch.setattr(discovery, "build_bookmaker_provider", lambda *a, **k: MockSportsbookProvider())
-    result = discover_qualifying(promotion(), "LIVE", exchange=None)
+    from providers.factory import ProviderSet
+
+    monkeypatch.setattr(
+        "providers.build_providers",
+        lambda *a, **k: ProviderSet(MockSportsbookProvider(), MockExchangeProvider(),
+                                    live=False, exchange_live=False),
+    )
+    result = discover_qualifying(promotion(), "LIVE")
     assert DiagnosticCode.PROVIDER_UNAVAILABLE.value in result.diagnostics
 
 

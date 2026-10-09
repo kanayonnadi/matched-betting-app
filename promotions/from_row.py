@@ -43,6 +43,14 @@ def promotion_from_row(row) -> Promotion:
         workflow_state=(
             (row["workflow_state"] if "workflow_state" in row.keys() else None) or "DRAFT"
         ),
+        eligible_markets=tuple(
+            part for part in (
+                (row["eligible_markets"] if "eligible_markets" in row.keys() else "") or ""
+            ).split(",") if part
+        ),
+        pre_match_only=(
+            _bool(row["pre_match_only"]) if "pre_match_only" in row.keys() else None
+        ),
         withdrawal_restrictions=(
             row["withdrawal_restrictions"] if "withdrawal_restrictions" in row.keys() else None
         ),

@@ -1,0 +1,13 @@
+{
+  "generated_at": "2026-10-09T00:50:30.912310+00:00",
+  "promotion": "Untitled offer",
+  "sportsbook": "PointsBet",
+  "mode": "LIVE",
+  "status": "UNAVAILABLE",
+  "bookmaker_key": "pointsbetca",
+  "diagnostics": [
+    "PROVIDER_UNAVAILABLE"
+  ],
+  "message": "The Odds API rejected the provided API key",
+  "recommendations": []
+}

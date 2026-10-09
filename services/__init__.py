@@ -8,6 +8,13 @@ from .discovery import (
     discover_conversion,
     discover_qualifying,
 )
+from .profit import (
+    ProfitView,
+    locked_in_range,
+    profit_view,
+    projected_profit,
+    realized_profit,
+)
 from .promotion_workflow import (
     MODES,
     LiveDataUnavailable,
@@ -34,9 +41,14 @@ __all__ = [
     "OpportunityStatus",
     "Recommendation",
     "WorkflowState",
+    "ProfitView",
     "classify_recommendation",
     "discover_conversion",
     "discover_qualifying",
+    "locked_in_range",
+    "profit_view",
+    "projected_profit",
+    "realized_profit",
     "calculate_net_profit",
     "confirm_qualifying_settlement",
     "confirm_reward_received",

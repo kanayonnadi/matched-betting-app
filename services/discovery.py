@@ -31,6 +31,7 @@ class DiagnosticCode(str, Enum):
     PROVIDER_UNAVAILABLE = "PROVIDER_UNAVAILABLE"
     NO_ELIGIBLE_MARKETS = "NO_ELIGIBLE_MARKETS"
     NO_STX_MARKETS = "NO_STX_MARKETS"
+    INELIGIBLE = "INELIGIBLE"
     INSUFFICIENT_LIQUIDITY = "INSUFFICIENT_LIQUIDITY"
     UNFAVORABLE_PRICING = "UNFAVORABLE_PRICING"
     STALE_DATA = "STALE_DATA"
@@ -50,6 +51,7 @@ _MESSAGES = {
     DiagnosticCode.PROVIDER_UNAVAILABLE: "Live odds/exchange providers are not configured or unavailable.",
     DiagnosticCode.NO_ELIGIBLE_MARKETS: "No eligible markets were found for this promotion's sportsbook.",
     DiagnosticCode.NO_STX_MARKETS: "No equivalent STX markets were found for the eligible events.",
+    DiagnosticCode.INELIGIBLE: "Candidates exist but none satisfy the promotion's eligibility conditions.",
     DiagnosticCode.INSUFFICIENT_LIQUIDITY: "Matching markets exist but cannot be fully hedged at current STX depth.",
     DiagnosticCode.UNFAVORABLE_PRICING: "Matching markets exist but pricing is unfavorable.",
     DiagnosticCode.STALE_DATA: "Quotes are stale; refresh to get current prices.",
@@ -77,18 +79,24 @@ def classify_recommendation(rec: Recommendation, mode: str) -> str:
 
 
 def _eligible(promotion, opportunities):
-    """Application of promotion eligibility rules before ranking."""
-    excluded = set(promotion.excluded_markets or ())
-    return [o for o in opportunities if not (excluded and o.market in excluded)]
+    """Apply promotion eligibility rules before ranking (M24.1)."""
+    from promotions import evaluate_eligibility
+
+    return [o for o in opportunities if evaluate_eligibility(promotion, o).eligible]
 
 
 def _live_pair_for(bookmaker_key, book, exchange):
+    if exchange is None:
+        from providers import build_providers
+
+        providers = build_providers()
+        if not providers.exchange_live:
+            raise LiveDataUnavailable(
+                "STX exchange is not configured; cannot verify executable liquidity."
+            )
+        exchange = providers.exchange
     if book is None:
         book = build_bookmaker_provider(bookmaker_key)
-    if exchange is None:
-        raise LiveDataUnavailable(
-            "STX exchange is not configured; cannot verify executable liquidity."
-        )
     return book, exchange
 
 
@@ -109,6 +117,9 @@ def _discover(promotion, mode, stake, kind, book=None, exchange=None, routes=Non
             )
         try:
             book_provider, exchange_provider = _live_pair_for(resolution.key, book, exchange)
+            if routes:
+                first = routes[0]
+                book_provider.get_events(first.odds_api_keys[0])
             raw = list(
                 discover_live_opportunities(
                     CachedProvider(book_provider, ttl_seconds=30),
@@ -138,15 +149,15 @@ def _with_bookmaker(result, key):
 def _rank(promotion, raw, kind, mode, amount):
     eligible = _eligible(promotion, raw)
     if not eligible:
-        code = DiagnosticCode.NO_ELIGIBLE_MARKETS
+        code = DiagnosticCode.INELIGIBLE if raw else DiagnosticCode.NO_ELIGIBLE_MARKETS
         return DiscoveryResult((), (code.value,), OpportunityStatus.UNAVAILABLE.value, _MESSAGES[code], mode)
 
     if kind is BetKind.QUALIFYING:
         recommendations = rank_qualifying_bets(promotion, eligible, max_results=4)
         all_candidates = rank_qualifying_bets(promotion, eligible, max_results=1000)
     else:
-        recommendations = rank_conversion_bets(amount, eligible, max_results=4)
-        all_candidates = rank_conversion_bets(amount, eligible, max_results=1000)
+        recommendations = rank_conversion_bets(amount, eligible, max_results=4, promotion=promotion)
+        all_candidates = rank_conversion_bets(amount, eligible, max_results=1000, promotion=promotion)
 
     if not recommendations:
         # Distinguish insufficient liquidity from no matches.
