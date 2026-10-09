@@ -1,0 +1,72 @@
+{
+  "generated_at": "2026-10-09T00:58:51.054755+00:00",
+  "promotion": "Untitled offer",
+  "sportsbook": "PointsBet",
+  "mode": "LIVE",
+  "status": "LIVE VERIFIED",
+  "bookmaker_key": "pointsbetca",
+  "diagnostics": [],
+  "message": "OK",
+  "recommendations": [
+    {
+      "event": "Dallas Cowboys vs Tampa Bay Buccaneers",
+      "selection": "Dallas Cowboys",
+      "book": "theoddsapi:pointsbetca",
+      "back_odds": "1.24",
+      "effective_lay_odds": "1.219512195121951219512195122",
+      "worst_case_pnl": "-0.01600",
+      "capital": "6.11600",
+      "liquidity_grade": "MEDIUM",
+      "fully_hedged": true,
+      "stale": false,
+      "eligibility": "USER-CONFIRMED ELIGIBLE",
+      "source_mode": "LIVE",
+      "depth_completeness": "UNKNOWN"
+    },
+    {
+      "event": "New England Patriots vs Las Vegas Raiders",
+      "selection": "New England Patriots",
+      "book": "theoddsapi:pointsbetca",
+      "back_odds": "1.53",
+      "effective_lay_odds": "1.612903225806451612903225806",
+      "worst_case_pnl": "-0.447000",
+      "capital": "7.907000",
+      "liquidity_grade": "MEDIUM",
+      "fully_hedged": true,
+      "stale": false,
+      "eligibility": "USER-CONFIRMED ELIGIBLE",
+      "source_mode": "LIVE",
+      "depth_completeness": "UNKNOWN"
+    },
+    {
+      "event": "Atlanta Falcons vs Baltimore Ravens",
+      "selection": "Atlanta Falcons",
+      "book": "theoddsapi:pointsbetca",
+      "back_odds": "1.59",
+      "effective_lay_odds": "1.694915254237288135593220339",
+      "worst_case_pnl": "-0.509500",
+      "capital": "8.259500",
+      "liquidity_grade": "MEDIUM",
+      "fully_hedged": true,
+      "stale": false,
+      "eligibility": "USER-CONFIRMED ELIGIBLE",
+      "source_mode": "LIVE",
+      "depth_completeness": "UNKNOWN"
+    },
+    {
+      "event": "New York Jets vs Cleveland Browns",
+      "selection": "New York Jets",
+      "book": "theoddsapi:pointsbetca",
+      "back_odds": "1.71",
+      "effective_lay_odds": "1.818181818181818181818181818",
+      "worst_case_pnl": "-0.517500",
+      "capital": "8.847500",
+      "liquidity_grade": "MEDIUM",
+      "fully_hedged": true,
+      "stale": false,
+      "eligibility": "USER-CONFIRMED ELIGIBLE",
+      "source_mode": "LIVE",
+      "depth_completeness": "UNKNOWN"
+    }
+  ]
+}

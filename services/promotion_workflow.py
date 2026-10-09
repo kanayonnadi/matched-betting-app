@@ -202,6 +202,23 @@ def _provenance_summary(opportunity) -> dict:
     return summary
 
 
+def _opportunity_stale(opportunity, exchange_max_age=30, book_max_age=300) -> bool:
+    """Source-aware freshness: exchange books 30s, sportsbook quotes 300s."""
+    provenance = getattr(opportunity, "provenance", None)
+    now = datetime.now(timezone.utc)
+    if provenance is not None:
+        exchange_ts = getattr(provenance, "exchange_book_timestamp", None)
+        book_ts = getattr(provenance, "sportsbook_quote_timestamp", None)
+        if exchange_ts is None and book_ts is None:
+            return is_stale(opportunity.timestamp)
+        if exchange_ts is not None and (now - exchange_ts).total_seconds() > exchange_max_age:
+            return True
+        if book_ts is not None and (now - book_ts).total_seconds() > book_max_age:
+            return True
+        return False
+    return is_stale(opportunity.timestamp)
+
+
 def _recommendation(opportunity, promotion=None) -> Recommendation:
     eligibility = ""
     if promotion is not None:
@@ -221,7 +238,7 @@ def _recommendation(opportunity, promotion=None) -> Recommendation:
         slippage_pct=getattr(opportunity, "lay_slippage_pct", None),
         timestamp=opportunity.timestamp,
         source_type=getattr(opportunity, "source_type", "MOCK"),
-        stale=is_stale(opportunity.timestamp),
+        stale=_opportunity_stale(opportunity),
         eligibility=eligibility,
         provenance=_provenance_summary(opportunity),
     )

@@ -18,6 +18,8 @@ from monitoring import is_stale
 from opportunities import discover_live_opportunities
 from providers import DEFAULT_ROUTES
 
+from .promotion_workflow import _opportunity_stale
+
 
 def _hedged(opportunity) -> bool:
     if getattr(opportunity, "fully_hedged", None) is not None:
@@ -51,7 +53,7 @@ def benchmark(stakes, book, exchange, routes=DEFAULT_ROUTES, now=None) -> dict:
                 "opportunities": len(opportunities),
                 "fully_hedgeable": len(fully),
                 "rejected_insufficient_depth": len(opportunities) - len(fully),
-                "rejected_stale": sum(1 for o in opportunities if is_stale(o.timestamp)),
+                "rejected_stale": sum(1 for o in opportunities if _opportunity_stale(o)),
                 "median_depth": str(_median([e.fillable_contracts for e in executions])) if executions else None,
                 "median_slippage_pct": str(_median(slippages)) if slippages else None,
                 "max_slippage_pct": str(max(slippages)) if slippages else None,

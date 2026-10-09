@@ -117,7 +117,14 @@ def test_rank_conversion_by_value():
 
 def test_stale_flag_is_set():
     opportunities = discover_mock_opportunities(10)
-    stale = [replace(opportunities[0], timestamp=NOW - timedelta(seconds=300))]
+    old = datetime.now(timezone.utc) - timedelta(seconds=400)
+    opp = opportunities[0]
+    aged_prov = replace(
+        opp.provenance,
+        sportsbook_quote_timestamp=old,
+        exchange_book_timestamp=old,
+    )
+    stale = [replace(opp, timestamp=old, provenance=aged_prov)]
     [rec] = rank_qualifying_bets(_promotion(), stale)
     assert rec.stale is True
 

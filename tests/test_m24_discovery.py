@@ -129,9 +129,15 @@ def test_classify_recommendation():
     )
     assert classify_recommendation(fresh, "LIVE") == OpportunityStatus.LIVE_VERIFIED.value
 
+    old = now - timedelta(seconds=400)
+    aged_prov = replace(
+        opp.provenance,
+        sportsbook_quote_timestamp=old,
+        exchange_book_timestamp=old,
+    )
     stale = _recommendation(
         replace(opp, source_type="LIVE", is_live=True, fully_hedged=True,
-                timestamp=now - timedelta(seconds=300))
+                timestamp=old, provenance=aged_prov)
     )
     assert classify_recommendation(stale, "LIVE") == OpportunityStatus.LIVE_STALE.value
 

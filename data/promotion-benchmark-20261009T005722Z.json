@@ -1,0 +1,74 @@
+{
+  "generated_at": "2026-10-09T00:57:22.611094+00:00",
+  "promotion": "Untitled offer",
+  "sportsbook": "PointsBet",
+  "mode": "LIVE",
+  "status": "LIVE STALE",
+  "bookmaker_key": "pointsbetca",
+  "diagnostics": [
+    "STALE_DATA"
+  ],
+  "message": "OK",
+  "recommendations": [
+    {
+      "event": "Dallas Cowboys vs Tampa Bay Buccaneers",
+      "selection": "Dallas Cowboys",
+      "book": "theoddsapi:pointsbetca",
+      "back_odds": "1.34",
+      "effective_lay_odds": "1.282051282051282051282051282",
+      "worst_case_pnl": "0.10600",
+      "capital": "6.47400",
+      "liquidity_grade": "MEDIUM",
+      "fully_hedged": true,
+      "stale": true,
+      "eligibility": "USER-CONFIRMED ELIGIBLE",
+      "source_mode": "LIVE",
+      "depth_completeness": "UNKNOWN"
+    },
+    {
+      "event": "Chicago White Sox vs Cleveland Guardians",
+      "selection": "Chicago White Sox",
+      "book": "theoddsapi:pointsbetca",
+      "back_odds": "2.05",
+      "effective_lay_odds": "2.040816326530612244897959184",
+      "worst_case_pnl": "-0.237500",
+      "capital": "10.227500",
+      "liquidity_grade": "MEDIUM",
+      "fully_hedged": true,
+      "stale": true,
+      "eligibility": "USER-CONFIRMED ELIGIBLE",
+      "source_mode": "LIVE",
+      "depth_completeness": "UNKNOWN"
+    },
+    {
+      "event": "New England Patriots vs Las Vegas Raiders",
+      "selection": "New England Patriots",
+      "book": "theoddsapi:pointsbetca",
+      "back_odds": "1.53",
+      "effective_lay_odds": "1.612903225806451612903225806",
+      "worst_case_pnl": "-0.447000",
+      "capital": "7.907000",
+      "liquidity_grade": "MEDIUM",
+      "fully_hedged": true,
+      "stale": true,
+      "eligibility": "USER-CONFIRMED ELIGIBLE",
+      "source_mode": "LIVE",
+      "depth_completeness": "UNKNOWN"
+    },
+    {
+      "event": "Atlanta Falcons vs Baltimore Ravens",
+      "selection": "Atlanta Falcons",
+      "book": "theoddsapi:pointsbetca",
+      "back_odds": "1.59",
+      "effective_lay_odds": "1.694915254237288135593220339",
+      "worst_case_pnl": "-0.509500",
+      "capital": "8.259500",
+      "liquidity_grade": "MEDIUM",
+      "fully_hedged": true,
+      "stale": true,
+      "eligibility": "USER-CONFIRMED ELIGIBLE",
+      "source_mode": "LIVE",
+      "depth_completeness": "UNKNOWN"
+    }
+  ]
+}
