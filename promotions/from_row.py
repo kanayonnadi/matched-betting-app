@@ -40,6 +40,9 @@ def promotion_from_row(row) -> Promotion:
         lifecycle_status=(
             row["lifecycle_status"] if "lifecycle_status" in row.keys() else None
         ) or row["status"],
+        workflow_state=(
+            (row["workflow_state"] if "workflow_state" in row.keys() else None) or "DRAFT"
+        ),
         withdrawal_restrictions=(
             row["withdrawal_restrictions"] if "withdrawal_restrictions" in row.keys() else None
         ),

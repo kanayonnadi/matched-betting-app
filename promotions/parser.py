@@ -101,7 +101,9 @@ def parse_terms(text: str) -> PromotionTerms:
         qualifying_stake = _decimal(match.group(1))
 
     reward_amount = None
-    match = re.search(r"(?:receive|get|win|earn)\s*\$?\s*(\d+(?:\.\d+)?)", lower)
+    match = re.search(
+        r"(?:receive|get|win|earn)\s+(?:a\s+|an\s+|up to\s+)?\$?\s*(\d+(?:\.\d+)?)", lower
+    )
     if match:
         reward_amount = _decimal(match.group(1))
 

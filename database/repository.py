@@ -405,7 +405,7 @@ def update_promotion(promotion_id, db_path=DB_PATH, **fields) -> None:
         "terms_text", "official_source_url", "terms_source_url", "terms_verified_at",
         "effective_date", "withdrawal_restrictions", "wagering_requirement_text",
         "min_deposit", "max_qualifying_stake", "expires_at", "status", "lifecycle_status",
-        "eligibility",
+        "eligibility", "workflow_state",
     }
     updates = {}
     for key, value in fields.items():

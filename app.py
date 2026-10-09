@@ -18,11 +18,29 @@ from database import (
 from ui import alerts as alerts_ui
 from ui import analytics as analytics_ui
 from ui import arbitrage as arbitrage_ui
+from ui import bankroll as bankroll_ui
+from ui import mybets as mybets_ui
 from ui import offers as offers_ui
 from ui import opportunities as opportunities_ui
+from ui import promotion_finder as promotion_finder_ui
 from ui import promotions as promotions_ui
 from ui import settlement as settlement_ui
 from ui import stress as stress_ui
+
+PRIMARY_PAGES = ["Find a Bet", "My Bets", "Bankroll"]
+ADVANCED_PAGES = [
+    "Dashboard",
+    "Matched Bet Calculator",
+    "Opportunities",
+    "Arbitrage",
+    "Alerts",
+    "Bet Tracker",
+    "Offer Planner",
+    "Promotions",
+    "Settlement",
+    "Risk",
+    "Analytics",
+]
 
 
 def fmt(value):
@@ -44,25 +62,22 @@ st.caption(
     "No bets are placed by this app."
 )
 
-page = st.sidebar.radio(
-    "Go to",
-    [
-        "Dashboard",
-        "Matched Bet Calculator",
-        "Opportunities",
-        "Arbitrage",
-        "Alerts",
-        "Bet Tracker",
-        "Bankroll",
-        "Offer Planner",
-        "Promotions",
-        "Settlement",
-        "Risk",
-        "Analytics",
-    ],
-)
+primary = st.sidebar.radio("Menu", PRIMARY_PAGES + ["Advanced"])
+if primary == "Advanced":
+    page = st.sidebar.radio("Advanced tools", ADVANCED_PAGES)
+else:
+    page = primary
 
-if page == "Dashboard":
+if page == "Find a Bet":
+    promotion_finder_ui.render()
+
+elif page == "My Bets":
+    mybets_ui.render()
+
+elif page == "Bankroll":
+    bankroll_ui.render()
+
+elif page == "Dashboard":
     st.header("Dashboard")
     bet_rows = list_bets()
     bankroll_rows = list_bankroll()
@@ -190,32 +205,6 @@ elif page == "Bet Tracker":
         if st.button("Update status"):
             update_bet_status(int(bet_id), status)
             st.success("Status updated. Refresh the page to see it.")
-
-elif page == "Bankroll":
-    st.header("Bankroll")
-    st.subheader("Bankroll ledger")
-    b1, b2, b3 = st.columns(3)
-    account = b1.text_input("Account", placeholder="Bookmaker / exchange / bank")
-    amount = b2.number_input(
-        "Adjustment",
-        value=0.0,
-        step=10.0,
-        help="Deposit/credit positive; withdrawal/debit negative",
-    )
-    note = b3.text_input("Ledger note")
-    if st.button("Add bankroll entry", disabled=not account.strip() or amount == 0):
-        add_bankroll_entry(account, amount, note)
-        st.success("Entry added.")
-    bank = rows_to_frame(list_bankroll())
-    if not bank.empty:
-        totals = (
-            bank.groupby("account", as_index=False)["amount"]
-            .sum()
-            .rename(columns={"amount": "balance"})
-        )
-        st.dataframe(totals, width="stretch", hide_index=True)
-        st.metric("Total tracked bankroll", fmt(totals.balance.sum()))
-        st.dataframe(bank, width="stretch", hide_index=True)
 
 elif page == "Offer Planner":
     offers_ui.render()

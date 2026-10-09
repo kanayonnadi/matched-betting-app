@@ -540,6 +540,11 @@ def _reservations_table(connection) -> None:
     )
 
 
+def _promotion_workflow_column(connection) -> None:
+    if not _column_exists(connection, "promotions", "workflow_state"):
+        connection.execute("ALTER TABLE promotions ADD COLUMN workflow_state TEXT")
+
+
 MIGRATIONS = (
     (1, "baseline tables", _baseline),
     (2, "bet selection and source", _add_bet_selection_and_source),
@@ -553,6 +558,7 @@ MIGRATIONS = (
     (10, "settlement reconciliation tables", _settlement_tables),
     (11, "promotion verification and reward tokens", _promotion_verification),
     (12, "bankroll reservations", _reservations_table),
+    (13, "promotion workflow state", _promotion_workflow_column),
 )
 
 

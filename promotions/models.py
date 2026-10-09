@@ -118,6 +118,7 @@ class Promotion:
     terms_verified_at: Optional[datetime] = None
     effective_date: Optional[str] = None
     lifecycle_status: str = PromotionStatus.DISCOVERED.value
+    workflow_state: str = "DRAFT"
     withdrawal_restrictions: Optional[str] = None
     wagering_requirement_text: Optional[str] = None
     min_deposit: Optional[Decimal] = None
