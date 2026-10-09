@@ -16,7 +16,10 @@ from database import (
     list_reward_tokens,
 )
 from promotions import (
+    IngestionStatus,
     RewardToken,
+    ingest_promotion,
+    looks_like_url,
     promotion_from_row,
 )
 from services import (
@@ -107,34 +110,116 @@ def _detect_book(text):
     return None
 
 
-def _quick_input():
-    st.subheader("Paste your sportsbook promotion")
-    text = st.text_area(
-        "Promotion", height=110, key="pf_text",
-        placeholder="e.g. BetMGM Ontario: Bet $10, get a $20 free bet. Minimum odds 1.50. Ontario only.",
+def _render_ingestion():
+    result = st.session_state.get("pf_ingest")
+    if result is None:
+        return
+    st.markdown("**Extracted from link**")
+    for message in result.messages:
+        st.warning(message)
+    if result.status == IngestionStatus.UNREACHABLE.value:
+        st.error(
+            "The page could not be read, so no conditions were assumed. "
+            "Paste the full promotion description into the field above instead."
+        )
+        return
+    st.caption(
+        f"Detected sportsbook: **{result.sportsbook or 'unknown'}** "
+        f"(from {result.sportsbook_source or 'n/a'}) · source: {result.final_url}"
     )
-    book_hint = st.text_input("Sportsbook (if not detected)", key="pf_book_hint")
-    if st.button("Find Opportunities", type="primary", key="pf_go"):
-        terms = parse_promotion(text)
-        book = book_hint.strip() or _detect_book(text)
-        missing = []
-        if not book:
-            missing.append("sportsbook")
-        if terms.qualifying_stake is None:
-            missing.append("qualifying stake")
-        if terms.reward_amount is None:
-            missing.append("reward amount")
-        st.session_state["pf_terms"] = terms
-        st.session_state["pf_book"] = book
-        if missing:
-            st.session_state["pf_missing"] = missing
+    if result.login_gated:
+        st.warning(
+            "This looks like a sign-up page that does not publish the full terms. "
+            "Confirm every condition below before searching."
+        )
+    if result.missing_terms:
+        st.warning("Missing critical terms: " + ", ".join(result.missing_terms))
+    if result.ambiguous_terms:
+        st.caption("Unconfirmed details: " + ", ".join(result.ambiguous_terms))
+    terms = result.terms
+    st.json(
+        {
+            "offer_type": terms.offer_type,
+            "qualifying_stake": str(terms.qualifying_stake),
+            "minimum_odds": str(terms.qualifying_min_odds),
+            "reward_amount": str(terms.reward_amount),
+            "reward_type": terms.reward_type,
+            "reward_count": terms.reward_count,
+            "stake_returned": terms.stake_returned,
+            "unknown_fields": list(terms.unknown_fields),
+        }
+    )
+    book_key = "pf_ingest_book"
+    if book_key not in st.session_state:
+        st.session_state[book_key] = result.sportsbook or ""
+    book = st.text_input("Sportsbook (confirm)", key=book_key)
+    terms_url = next(
+        (p.url for p in result.pages[1:] if p.ok and p.text), None
+    )
+    if st.button("Confirm terms & save", key="pf_ingest_save"):
+        if not book.strip():
+            st.error("Sportsbook is required (it must not be assumed).")
         else:
-            st.session_state.pop("pf_missing", None)
             promotion_id = save_promotion(
-                terms, book, "promotion", jurisdiction="Ontario", terms_text=text
+                terms, book.strip(), "promotion", jurisdiction="Ontario",
+                official_url=result.final_url, terms_url=terms_url,
+                terms_text=result.text,
             )
             st.session_state["pf_selected"] = promotion_id
-            st.success(f"Saved promotion #{promotion_id}. Review conditions and find a bet below.")
+            st.session_state.pop("pf_ingest", None)
+            st.session_state.pop(book_key, None)
+            st.success(
+                f"Saved promotion #{promotion_id} from link. Review conditions, "
+                "confirm eligibility, then find a bet below."
+            )
+
+
+def _quick_input():
+    st.subheader("Paste a promotion link or description")
+    st.caption(
+        "Enter a promotion URL, or paste the full promotion description. A signup "
+        "link may not publish the full terms; if it cannot be read, paste the "
+        "description instead. Nothing is assumed."
+    )
+    text = st.text_area(
+        "Promotion URL or text", height=110, key="pf_text",
+        placeholder=(
+            "e.g. https://www.pointsbet.ca/promo  — or paste: "
+            "BetMGM Ontario: Bet $10, get a $20 free bet. Minimum odds 1.50. Ontario only."
+        ),
+    )
+    book_hint = st.text_input("Sportsbook (optional; only if not auto-detected)", key="pf_book_hint")
+    if st.button("Find Opportunities", type="primary", key="pf_go"):
+        value = text.strip()
+        if looks_like_url(value):
+            st.session_state["pf_ingest"] = ingest_promotion(
+                value, sportsbook_override=book_hint.strip() or None
+            )
+            st.session_state.pop("pf_missing", None)
+        else:
+            st.session_state.pop("pf_ingest", None)
+            terms = parse_promotion(value)
+            book = book_hint.strip() or _detect_book(value)
+            missing = []
+            if not book:
+                missing.append("sportsbook")
+            if terms.qualifying_stake is None:
+                missing.append("qualifying stake")
+            if terms.reward_amount is None:
+                missing.append("reward amount")
+            st.session_state["pf_terms"] = terms
+            st.session_state["pf_book"] = book
+            if missing:
+                st.session_state["pf_missing"] = missing
+            else:
+                st.session_state.pop("pf_missing", None)
+                promotion_id = save_promotion(
+                    terms, book, "promotion", jurisdiction="Ontario", terms_text=value
+                )
+                st.session_state["pf_selected"] = promotion_id
+                st.success(f"Saved promotion #{promotion_id}. Review conditions and find a bet below.")
+
+    _render_ingestion()
 
     missing = st.session_state.get("pf_missing")
     if missing:
