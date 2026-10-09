@@ -1,0 +1,17 @@
+{
+  "label": "REAL promotion documented terms - OLG PROLINE+ 'Bet $10, Get $100'. NOT evidence of matched-betting eligibility or of executable profit.",
+  "source": "Operator promotion description supplied by the user for this milestone.",
+  "sportsbook": "OLG Proline",
+  "name": "OLG PROLINE+ Bet $10 Get $100",
+  "terms_text": "OLG PROLINE+: Bet $10, Get $100 in five $20 Sports Bonus Bets. Each Sports Bonus Bet can be used on one wager. Stake not returned. Bonus bets expire 168 hours after they are credited. Rewards are issued after your qualifying wager settles. Ontario only.",
+  "general_terms": "General promotional terms: wagering that is determined to be minimum risk, matched, or arbitrage betting is prohibited and may result in the promotion being voided and the account being closed.",
+  "expected": {
+    "reward_count": 5,
+    "reward_unit_amount": 20,
+    "total_face_value": 100,
+    "reward_type": "FREE_BET_SNR",
+    "reward_expiry_hours": 168,
+    "reward_issue_after_settlement": true,
+    "strategy_compliance": "RESTRICTED"
+  }
+}

@@ -107,6 +107,11 @@ def value_promotion(
     roi = expected_net / peak_capital * HUNDRED if peak_capital > ZERO else ZERO
 
     warnings = []
+    from .restrictions import evaluate_restrictions
+
+    restrictions = evaluate_restrictions(promotion)
+    if restrictions.restricted:
+        warnings.append(restrictions.note)
     verified = promotion.status in (PromotionStatus.VERIFIED.value, PromotionStatus.ACTIVE.value)
     if not verified:
         warnings.append(f"promotion status {promotion.status}")
@@ -128,6 +133,7 @@ def value_promotion(
     ready = (
         verified
         and eligible
+        and not restrictions.restricted
         and best_q is not None
         and best_q.fully_hedged
         and (not conversion_opportunities or (best_c is not None and best_c.fully_hedged))

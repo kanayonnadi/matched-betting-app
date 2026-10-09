@@ -13,7 +13,25 @@ def _bool(value):
     return None if value is None else bool(value)
 
 
+def _denominations(row):
+    if "reward_denominations" not in row.keys():
+        return ()
+    raw = row["reward_denominations"] or ""
+    values = []
+    for part in str(raw).split(","):
+        part = part.strip()
+        if part:
+            try:
+                values.append(Decimal(part))
+            except Exception:  # noqa: BLE001
+                continue
+    return tuple(values)
+
+
 def promotion_from_row(row) -> Promotion:
+    def optional(name):
+        return row[name] if name in row.keys() else None
+
     return Promotion(
         id=row["id"],
         sportsbook=row["sportsbook"] or "",
@@ -29,6 +47,17 @@ def promotion_from_row(row) -> Promotion:
         reward_count=row["reward_count"] or 1,
         stake_returned=_bool(row["stake_returned"]),
         reward_expiry_days=row["reward_expiry_days"],
+        reward_unit_amount=_decimal(optional("reward_unit_amount")),
+        reward_denominations=_denominations(row),
+        reward_expiry_hours=optional("reward_expiry_hours"),
+        reward_issue_after_settlement=(
+            _bool(optional("reward_issue_after_settlement"))
+            if "reward_issue_after_settlement" in row.keys()
+            else None
+        ),
+        reward_restrictions=tuple(
+            part for part in (str(optional("reward_restrictions") or "").split("|")) if part
+        ),
         source_url=row["source_url"],
         terms_text=row["terms_text"],
         status=row["status"],

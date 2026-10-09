@@ -51,6 +51,8 @@ class ProfitabilityStatus(str, Enum):
     CONVERSION_UNAVAILABLE = "CONVERSION UNAVAILABLE"
     STALE = "STALE"
     INSUFFICIENT_CAPITAL = "INSUFFICIENT CAPITAL"
+    STRATEGY_RESTRICTED = "STRATEGY RESTRICTED"
+    PARTIAL_REWARDS = "PARTIAL REWARDS"
 
 
 @dataclass(frozen=True)
@@ -167,6 +169,18 @@ class PromotionProfitability:
     confidence: float
     warnings: Tuple[str, ...]
     provenance: Optional[object]
+    # Split-reward extensions (M25.3). All default so single-reward callers and
+    # existing tests are unaffected.
+    reward_plan: Tuple[object, ...] = ()
+    verified_reward_count: int = 0
+    unverified_reward_count: int = 0
+    verified_conversion_total: Decimal = ZERO
+    hypothetical_conversion_total: Decimal = ZERO
+    unconverted_face_value: Decimal = ZERO
+    conditional_worst_case_total: Optional[Decimal] = None
+    conditional_best_case_total: Optional[Decimal] = None
+    strategy_compliance: str = ""
+    restriction_flags: Tuple[str, ...] = ()
 
     def to_dict(self) -> dict:
         return {
@@ -199,6 +213,18 @@ class PromotionProfitability:
             "expected_value": _opt(self.expected_value),
             "roi_on_capital": _opt(self.roi_on_capital),
             "warnings": list(self.warnings),
+            "reward_plan": [
+                rc.to_dict() if hasattr(rc, "to_dict") else rc for rc in self.reward_plan
+            ],
+            "verified_reward_count": self.verified_reward_count,
+            "unverified_reward_count": self.unverified_reward_count,
+            "verified_conversion_total": str(self.verified_conversion_total),
+            "hypothetical_conversion_total": str(self.hypothetical_conversion_total),
+            "unconverted_face_value": str(self.unconverted_face_value),
+            "conditional_worst_case_total": _opt(self.conditional_worst_case_total),
+            "conditional_best_case_total": _opt(self.conditional_best_case_total),
+            "strategy_compliance": self.strategy_compliance,
+            "restriction_flags": list(self.restriction_flags),
         }
 
 
@@ -529,6 +555,16 @@ def discover_profitability(
     can still surface the detailed diagnostics behind expandable sections.
     """
     from .discovery import discover_conversion, discover_qualifying
+    from promotions import collection_from_promotion
+
+    collection = collection_from_promotion(promotion)
+    if collection.count > 1:
+        evaluation, qualifying_result, conversion_results = discover_split_profitability(
+            promotion, mode, stake=stake, book=book, exchange=exchange, routes=routes,
+            balances=balances, now=now,
+        )
+        conversion_result = conversion_results[0] if conversion_results else None
+        return evaluation, qualifying_result, conversion_result
 
     qualifying_result = discover_qualifying(
         promotion, mode, stake=stake, book=book, exchange=exchange, routes=routes
@@ -554,3 +590,402 @@ def discover_profitability(
         now=now,
     )
     return evaluation, qualifying_result, conversion_result
+
+
+# --- M25.3: individual reward conversions ------------------------------------
+
+@dataclass(frozen=True)
+class RewardConversion:
+    reward_id: str
+    amount: Decimal
+    status: str
+    verified: bool
+    reused: bool
+    depth_unspecified: bool
+    opportunity: Optional[object]
+    depth_status: str
+    conversion_rate: Optional[Decimal]
+    worst_case: Decimal
+    best_case: Decimal
+    exchange_capital: Decimal
+    lay_fee: Decimal
+    slippage_pct: Optional[Decimal]
+    reason: str = ""
+
+    def to_dict(self) -> dict:
+        return {
+            "reward_id": self.reward_id,
+            "amount": str(self.amount),
+            "status": self.status,
+            "verified": self.verified,
+            "reused_market": self.reused,
+            "depth_unspecified": self.depth_unspecified,
+            "depth_status": self.depth_status,
+            "conversion_rate": _opt(self.conversion_rate),
+            "worst_case": str(self.worst_case),
+            "best_case": str(self.best_case),
+            "exchange_capital": str(self.exchange_capital),
+            "lay_fee": str(self.lay_fee),
+            "slippage_pct": _opt(self.slippage_pct),
+            "reason": self.reason,
+        }
+
+
+def _market_key(opportunity):
+    return (
+        getattr(opportunity, "exchange_provider", None),
+        getattr(opportunity, "event_id", None),
+        getattr(opportunity, "market", None),
+        getattr(opportunity, "selection", None),
+    )
+
+
+def _reward_is_verified(rec, mode: str) -> bool:
+    if rec is None or not getattr(rec, "fully_hedged", False) or getattr(rec, "stale", False):
+        return False
+    if getattr(rec, "depth_status", "") == "VERIFIED":
+        return True
+    return mode == "DEMO"  # simulated preview only; never LIVE
+
+
+def plan_reward_conversions(
+    collection,
+    pools,
+    *,
+    mode: str = "LIVE",
+    now=None,
+) -> Tuple[RewardConversion, ...]:
+    """Assign each reward an independent conversion, accounting for aggregate depth.
+
+    ``pools`` maps a reward amount to a sequence of discovery recommendations for
+    that stake. Verified depth consumed by earlier rewards is subtracted so the
+    same liquidity can never be silently reused across rewards.
+    """
+    consumption = {}
+    conversions = []
+    for unit in collection.rewards:
+        candidates = list(pools.get(unit.amount) or pools.get(Decimal(str(unit.amount))) or [])
+        ordered = sorted(
+            candidates,
+            key=lambda rec: min(
+                rec.opportunity.profit_if_back, rec.opportunity.profit_if_lay
+            ),
+            reverse=True,
+        )
+        chosen = None
+        reason = ""
+        reused = False
+        depth_unspecified = False
+        for rec in ordered:
+            opportunity = rec.opportunity
+            verified = _reward_is_verified(rec, mode)
+            key = _market_key(opportunity)
+            available = getattr(opportunity, "available_contracts", None)
+            executable = getattr(opportunity, "executable_contracts", None)
+            used = consumption.get(key, ZERO)
+            if verified and available is not None and executable is not None:
+                if used + executable <= available:
+                    chosen, reused = rec, used > ZERO
+                    consumption[key] = used + executable
+                    break
+                reason = "aggregate STX depth insufficient for repeated use"
+                continue
+            if verified:
+                # Verified but without contract metadata (e.g. simulated preview).
+                chosen, reused, depth_unspecified = rec, used > ZERO, True
+                consumption[key] = used + Decimal("1")
+                break
+            if chosen is None:
+                chosen = rec
+                reason = f"depth {getattr(rec, 'depth_status', '') or 'UNKNOWN'} not verified"
+        if chosen is None:
+            conversions.append(
+                RewardConversion(
+                    reward_id=unit.reward_id, amount=unit.amount, status=unit.status,
+                    verified=False, reused=False, depth_unspecified=False, opportunity=None,
+                    depth_status="", conversion_rate=None, worst_case=ZERO, best_case=ZERO,
+                    exchange_capital=ZERO, lay_fee=ZERO, slippage_pct=None,
+                    reason=reason or "no conversion candidate at current prices",
+                )
+            )
+            continue
+        opportunity = chosen.opportunity
+        fee = getattr(opportunity, "lay_fee", None)
+        conversions.append(
+            RewardConversion(
+                reward_id=unit.reward_id, amount=unit.amount, status=unit.status,
+                verified=_reward_is_verified(chosen, mode), reused=reused,
+                depth_unspecified=depth_unspecified, opportunity=opportunity,
+                depth_status=getattr(chosen, "depth_status", "") or "",
+                conversion_rate=getattr(opportunity, "conversion_rate", None),
+                worst_case=min(opportunity.profit_if_back, opportunity.profit_if_lay),
+                best_case=max(opportunity.profit_if_back, opportunity.profit_if_lay),
+                exchange_capital=_dec(opportunity.lay_liability),
+                lay_fee=_dec(fee) if fee is not None else ZERO,
+                slippage_pct=getattr(opportunity, "lay_slippage_pct", None),
+                reason=reason,
+            )
+        )
+    return tuple(conversions)
+
+
+def evaluate_reward_collection_profitability(
+    promotion,
+    qualifying_rec,
+    collection,
+    pools,
+    *,
+    mode: str = "LIVE",
+    balances=None,
+    sportsbook_account=None,
+    exchange_account: str = "STX",
+    now=None,
+) -> PromotionProfitability:
+    """Combine a qualifying leg with per-reward conversions for split rewards."""
+    from promotions import EligibilityStatus, evaluate_eligibility
+    from promotions.lifecycle import is_terms_verified
+    from promotions.restrictions import evaluate_restrictions
+
+    restrictions = evaluate_restrictions(promotion)
+    count = max(collection.count, 1)
+    terms_verified = is_terms_verified(promotion.status)
+    eligibility = evaluate_eligibility(
+        promotion, qualifying_rec.opportunity if qualifying_rec else None
+    )
+    eligible = bool(eligibility.eligible) and (
+        promotion.eligibility == EligibilityStatus.ELIGIBLE.value
+    )
+
+    qualifying = stage_from_recommendation(qualifying_rec, sportsbook_capital=True)
+    supported, support_note = conversion_support(promotion)
+
+    plan = plan_reward_conversions(collection, pools, mode=mode, now=now)
+    verified = [rc for rc in plan if rc.verified]
+    hypothetical = [rc for rc in plan if not rc.verified and rc.opportunity is not None]
+    unplaceable = [rc for rc in plan if rc.opportunity is None]
+
+    verified_conv = sum((rc.worst_case for rc in verified), ZERO)
+    hypothetical_conv = sum((rc.worst_case for rc in hypothetical), ZERO)
+    unconverted_face = sum((rc.amount for rc in unplaceable), ZERO)
+
+    fully_verified = bool(plan) and supported and all(rc.verified for rc in plan)
+
+    qualifying_capital = qualifying.sportsbook_capital + qualifying.exchange_capital
+    conversion_capital = sum((rc.exchange_capital for rc in plan), ZERO)
+    peak_capital = qualifying_capital + conversion_capital
+    turnover = qualifying.back_stake + qualifying.lay_stake + sum(
+        (_dec(rc.opportunity.lay_stake) for rc in plan if rc.opportunity is not None), ZERO
+    )
+
+    worst_total = (
+        qualifying.worst_case + verified_conv if fully_verified else None
+    )
+    best_total = (
+        qualifying.best_case + sum((rc.best_case for rc in verified), ZERO)
+        if fully_verified else None
+    )
+    conditional_worst = qualifying.worst_case + verified_conv + hypothetical_conv
+    conditional_best = qualifying.best_case + sum(
+        (rc.best_case for rc in plan if rc.opportunity is not None), ZERO
+    )
+
+    roi = (
+        worst_total / peak_capital * HUNDRED
+        if (worst_total is not None and peak_capital > ZERO)
+        else None
+    )
+
+    warnings = []
+    if not terms_verified:
+        warnings.append(f"promotion status {promotion.status}")
+    if not eligible:
+        warnings.append(f"eligibility {promotion.eligibility}")
+    if restrictions.restricted:
+        warnings.append(restrictions.note)
+    if not supported:
+        warnings.append(support_note)
+    if unplaceable:
+        warnings.append(
+            f"{len(unplaceable)} reward(s) have no conversion candidate; "
+            f"{_opt(unconverted_face)} face value is not counted as profit."
+        )
+    if hypothetical and not unplaceable:
+        warnings.append(
+            f"{len(hypothetical)} reward(s) rely on repeated use of the same market "
+            "and are shown as a conditional/hypothetical preview only."
+        )
+    warnings.append("reward conversions are a preview, not a guarantee")
+
+    if restrictions.restricted:
+        status = ProfitabilityStatus.STRATEGY_RESTRICTED.value
+    elif not terms_verified:
+        status = ProfitabilityStatus.UNVERIFIED_TERMS.value
+    elif not eligible:
+        status = ProfitabilityStatus.INELIGIBLE.value
+    elif not qualifying.found:
+        status = ProfitabilityStatus.NO_QUALIFYING.value
+    elif not qualifying.fully_hedged:
+        status = ProfitabilityStatus.DEPTH_UNVERIFIED.value
+    elif not supported:
+        status = ProfitabilityStatus.CONVERSION_UNSUPPORTED.value
+    elif not plan or all(rc.opportunity is None for rc in plan):
+        status = ProfitabilityStatus.CONVERSION_UNAVAILABLE.value
+    elif not fully_verified:
+        status = ProfitabilityStatus.PARTIAL_REWARDS.value
+    else:
+        requirement = bankroll_requirement(
+            _split_shell(promotion, qualifying, plan, count),
+            balances, sportsbook_account=sportsbook_account, exchange_account=exchange_account,
+        )
+        if balances is not None and requirement.sufficient is False:
+            status = ProfitabilityStatus.INSUFFICIENT_CAPITAL.value
+            warnings.append("insufficient available bankroll")
+        elif worst_total is not None and worst_total > ZERO:
+            status = ProfitabilityStatus.PROFITABLE.value
+        else:
+            status = ProfitabilityStatus.NOT_PROFITABLE.value
+
+    representative = verified[0] if verified else (plan[0] if plan else None)
+    conversion_stage = (
+        stage_from_recommendation(_fake_rec(representative), sportsbook_capital=False)
+        if representative is not None and representative.opportunity is not None
+        else _empty_stage()
+    )
+    provenance = getattr(qualifying.opportunity, "provenance", None) if qualifying.found else None
+
+    return PromotionProfitability(
+        promotion_id=promotion.id,
+        sportsbook=promotion.sportsbook,
+        name=promotion.name,
+        mode=mode,
+        reward_type=collection.reward_type,
+        reward_amount=collection.total_face_value,
+        reward_count=count,
+        stake_returned=promotion.stake_returned,
+        terms_verified=terms_verified,
+        eligible=eligible,
+        eligibility_state=eligibility.state,
+        market_equivalence_verified=provenance is not None,
+        conversion_supported=supported,
+        conversion_note=support_note,
+        conversion_preview=True,
+        reward_confirmed=collection.rewards_received > 0,
+        qualifying=qualifying,
+        conversion=conversion_stage,
+        qualifying_capital=qualifying_capital,
+        conversion_capital=conversion_capital,
+        peak_capital=peak_capital,
+        turnover=turnover,
+        worst_case_total=worst_total,
+        best_case_total=best_total,
+        projected_total=worst_total,
+        expected_value=None,
+        expected_value_note=EXPECTED_VALUE_NOTE,
+        roi_on_capital=roi,
+        projected_profitable=(status == ProfitabilityStatus.PROFITABLE.value),
+        status=status,
+        confidence=promotion.confidence,
+        warnings=tuple(warnings),
+        provenance=provenance,
+        reward_plan=plan,
+        verified_reward_count=len(verified),
+        unverified_reward_count=len(hypothetical) + len(unplaceable),
+        verified_conversion_total=verified_conv,
+        hypothetical_conversion_total=hypothetical_conv,
+        unconverted_face_value=unconverted_face,
+        conditional_worst_case_total=conditional_worst,
+        conditional_best_case_total=conditional_best,
+        strategy_compliance=restrictions.compliance,
+        restriction_flags=restrictions.flags,
+    )
+
+
+def _fake_rec(conversion: RewardConversion):
+    from .promotion_workflow import Recommendation
+
+    opportunity = conversion.opportunity
+    return Recommendation(
+        opportunity=opportunity,
+        worst_case_pnl=conversion.worst_case,
+        capital=conversion.exchange_capital,
+        liquidity_grade=getattr(opportunity, "liquidity_grade", None),
+        fully_hedged=conversion.verified,
+        slippage_pct=conversion.slippage_pct,
+        timestamp=getattr(opportunity, "timestamp", None),
+        source_type=getattr(opportunity, "source_type", "MOCK"),
+        stale=False,
+        depth_status=conversion.depth_status,
+        available_contracts=getattr(opportunity, "available_contracts", None),
+        requested_contracts=getattr(opportunity, "requested_contracts", None),
+        executable_contracts=getattr(opportunity, "executable_contracts", None),
+        effective_price=getattr(opportunity, "effective_lay_odds", None),
+        provenance={},
+    )
+
+
+def _split_shell(promotion, qualifying, plan, count) -> PromotionProfitability:
+    """Minimal object so bankroll_requirement can aggregate split collateral."""
+    conversion = _empty_stage()
+    if plan:
+        representative = next((rc for rc in plan if rc.opportunity is not None), None)
+        conversion = StageProfitability(
+            found=representative is not None,
+            opportunity=representative.opportunity if representative else None,
+            back_stake=representative.amount if representative else ZERO,
+            back_odds=None, lay_stake=ZERO,
+            lay_liability=sum((rc.exchange_capital for rc in plan), ZERO),
+            lay_fee=ZERO, worst_case=ZERO, best_case=ZERO, conversion_rate=None,
+            exchange_capital=sum((rc.exchange_capital for rc in plan), ZERO),
+            sportsbook_capital=ZERO, depth_status="", fully_hedged=True, stale=False,
+            source_type="",
+        )
+    return PromotionProfitability(
+        promotion_id=promotion.id, sportsbook=promotion.sportsbook, name=promotion.name,
+        mode="", reward_type=promotion.reward_type or "",
+        reward_amount=sum((rc.amount for rc in plan), ZERO), reward_count=count,
+        stake_returned=promotion.stake_returned, terms_verified=True, eligible=True,
+        eligibility_state="", market_equivalence_verified=False,
+        conversion_supported=True, conversion_note="", conversion_preview=True,
+        reward_confirmed=False, qualifying=qualifying, conversion=conversion,
+        qualifying_capital=ZERO, conversion_capital=ZERO, peak_capital=ZERO,
+        turnover=ZERO, worst_case_total=None, best_case_total=None,
+        projected_total=None, expected_value=None, expected_value_note="",
+        roi_on_capital=None, projected_profitable=False, status="", confidence=0.0,
+        warnings=(), provenance=None,
+    )
+
+
+def discover_split_profitability(
+    promotion,
+    mode: str = "LIVE",
+    *,
+    stake=None,
+    book=None,
+    exchange=None,
+    routes=None,
+    balances=None,
+    now=None,
+):
+    """Discover a qualifying leg and a conversion pool per distinct reward amount."""
+    from .discovery import discover_conversion, discover_qualifying
+    from promotions import collection_from_promotion
+
+    collection = collection_from_promotion(promotion)
+    qualifying_result = discover_qualifying(
+        promotion, mode, stake=stake, book=book, exchange=exchange, routes=routes
+    )
+    qualifying_rec = (
+        qualifying_result.recommendations[0] if qualifying_result.recommendations else None
+    )
+    pools = {}
+    conversion_results = []
+    for amount in collection.distinct_amounts():
+        result = discover_conversion(
+            promotion, amount, mode, book=book, exchange=exchange, routes=routes
+        )
+        conversion_results.append(result)
+        pools[amount] = list(result.recommendations)
+    evaluation = evaluate_reward_collection_profitability(
+        promotion, qualifying_rec, collection, pools, mode=mode, balances=balances, now=now
+    )
+    return evaluation, qualifying_result, tuple(conversion_results)

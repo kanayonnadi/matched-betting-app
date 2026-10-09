@@ -78,6 +78,12 @@ class PromotionTerms:
     reward_expiry_days: Optional[int] = None
     new_customer_only: Optional[bool] = None
     jurisdiction: Optional[str] = None
+    # Split-reward terms (M25.3).
+    reward_unit_amount: Optional[Decimal] = None
+    reward_denominations: Tuple[Decimal, ...] = ()
+    reward_expiry_hours: Optional[int] = None
+    reward_issue_after_settlement: Optional[bool] = None
+    reward_restrictions: Tuple[str, ...] = ()
     unknown_fields: Tuple[str, ...] = ()
     confidence: float = 0.0
 
@@ -101,6 +107,12 @@ class Promotion:
     reward_count: int = 1
     stake_returned: Optional[bool] = None
     reward_expiry_days: Optional[int] = None
+    # Split-reward terms (M25.3).
+    reward_unit_amount: Optional[Decimal] = None
+    reward_denominations: Tuple[Decimal, ...] = ()
+    reward_expiry_hours: Optional[int] = None
+    reward_issue_after_settlement: Optional[bool] = None
+    reward_restrictions: Tuple[str, ...] = ()
     eligible_sports: Tuple[str, ...] = ()
     eligible_markets: Tuple[str, ...] = ()
     excluded_markets: Tuple[str, ...] = ()
@@ -128,6 +140,9 @@ class Promotion:
 
     @property
     def reward_token_amount(self) -> Decimal:
+        """Per-reward amount. Prefers an explicit unit; falls back to even split."""
+        if self.reward_unit_amount is not None:
+            return Decimal(str(self.reward_unit_amount))
         if self.reward_amount is None:
             return Decimal("0")
         count = max(self.reward_count or 1, 1)

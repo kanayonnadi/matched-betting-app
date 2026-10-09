@@ -11,14 +11,25 @@ from decimal import Decimal
 from enum import Enum
 from typing import Optional, Tuple
 
+from .rewards import RewardStatus, canonical_status
+
 ZERO = Decimal("0")
 
 
 class RewardTokenStatus(str, Enum):
     PENDING = "PENDING"
+    # M25.3 individual reward lifecycle.
+    CREDITED = "CREDITED"
+    RESERVED = "RESERVED"
+    REDEEMED = "REDEEMED"
+    SETTLED = "SETTLED"
+    EXPIRED = "EXPIRED"
+    VOIDED = "VOIDED"
+    CANCELLED = "CANCELLED"
+    FAILED = "FAILED"
+    # Legacy aliases retained for backward compatibility with existing records.
     RECEIVED = "RECEIVED"
     USED = "USED"
-    EXPIRED = "EXPIRED"
     REJECTED = "REJECTED"
 
 
@@ -41,6 +52,13 @@ class RewardToken:
     linked_conversion_bet_id: Optional[int] = None
     realized_value: Optional[Decimal] = None
     note: Optional[str] = None
+    # M25.3 individualised tracking.
+    sequence: Optional[int] = None
+    group_key: Optional[str] = None
+    reserved_at: Optional[datetime] = None
+    settled_at: Optional[datetime] = None
+    voided_at: Optional[datetime] = None
+    realized_pnl: Optional[Decimal] = None
 
 
 def is_expired(token: RewardToken, now: Optional[datetime] = None) -> bool:
@@ -51,15 +69,16 @@ def is_expired(token: RewardToken, now: Optional[datetime] = None) -> bool:
 
 
 def effective_status(token: RewardToken, now: Optional[datetime] = None) -> str:
-    if token.status == RewardTokenStatus.RECEIVED.value and is_expired(token, now):
-        return RewardTokenStatus.EXPIRED.value
-    return token.status
+    status = canonical_status(token.status)
+    if status == RewardStatus.CREDITED.value and is_expired(token, now):
+        return RewardStatus.EXPIRED.value
+    return status
 
 
 def outstanding_face_value(tokens, now: Optional[datetime] = None) -> Decimal:
     total = ZERO
     for token in tokens:
-        if effective_status(token, now) == RewardTokenStatus.RECEIVED.value:
+        if effective_status(token, now) == RewardStatus.CREDITED.value:
             total += token.face_value
     return total
 
@@ -86,7 +105,10 @@ def realized_value(tokens, bets_by_id=None) -> Decimal:
         return ZERO
     total = ZERO
     for token in tokens:
-        if token.status != RewardTokenStatus.USED.value:
+        if canonical_status(token.status) not in (
+            RewardStatus.REDEEMED.value,
+            RewardStatus.SETTLED.value,
+        ):
             continue
         bet_id = token.linked_conversion_bet_id
         if bet_id is None:
@@ -103,7 +125,10 @@ def pending_conversion_value(tokens, bets_by_id=None) -> Decimal:
         return ZERO
     total = ZERO
     for token in tokens:
-        if token.status != RewardTokenStatus.USED.value:
+        if canonical_status(token.status) not in (
+            RewardStatus.REDEEMED.value,
+            RewardStatus.SETTLED.value,
+        ):
             continue
         bet_id = token.linked_conversion_bet_id
         if bet_id is None:

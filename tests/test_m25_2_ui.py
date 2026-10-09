@@ -98,7 +98,7 @@ class Harness:
         monkeypatch.setattr(pf, "get_promotion", lambda pid, *a, **k: _row(self.promotion))
         monkeypatch.setattr(pf, "sync_workflow", lambda *a, **k: "DRAFT")
         monkeypatch.setattr(pf, "list_reward_tokens", lambda *a, **k: [])
-        monkeypatch.setattr(pf, "create_reward_token", lambda *a, **k: 1)
+        monkeypatch.setattr(pf, "issue_reward_tokens", lambda *a, **k: [1])
         monkeypatch.setattr(pf, "_bankroll_available", lambda: None)
         monkeypatch.setattr(
             pf,

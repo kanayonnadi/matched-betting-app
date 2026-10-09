@@ -105,6 +105,13 @@ def evaluate_promotion(
     if expired:
         warnings.append("promotion expired")
 
+    # Gate 4: strategy compliance (general terms may prohibit matched betting).
+    from .restrictions import evaluate_restrictions
+
+    restrictions = evaluate_restrictions(promotion)
+    if restrictions.restricted:
+        warnings.append(restrictions.note)
+
     pool = filter_for_promotion(promotion, qualifying_pool)
     qualifying_candidates = best_qualifying(promotion, pool, limit=1)
     best_q = qualifying_candidates[0] if qualifying_candidates else None
@@ -160,6 +167,8 @@ def evaluate_promotion(
     # Status determination (order matters).
     if expired:
         status = CandidateStatus.NOT_READY.value
+    elif restrictions.restricted:
+        status = CandidateStatus.REVIEW.value
     elif not verified or not eligible:
         status = CandidateStatus.REVIEW.value
     elif best_q is None:

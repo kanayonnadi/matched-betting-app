@@ -317,6 +317,14 @@ def record_qualifying_placed(promotion_id, opportunity, db_path=None) -> int:
 
 def record_conversion_placed(promotion_id, token_id, opportunity, db_path=None) -> int:
     kw = _kw(db_path)
+    from database import get_reward_token
+    from promotions import reward_canonical_status
+
+    token_row = get_reward_token(int(token_id), **kw)
+    if token_row is not None:
+        current = reward_canonical_status(token_row["status"])
+        if current in ("REDEEMED", "SETTLED"):
+            raise ValueError(f"reward {token_id} has already been redeemed")
     bet_id = insert_bet(
         event=opportunity.event_label, bookmaker=opportunity.book_provider,
         exchange=opportunity.exchange_provider, market=opportunity.market,
@@ -334,7 +342,7 @@ def record_conversion_placed(promotion_id, token_id, opportunity, db_path=None) 
     record_promotion_action(promotion_id, "conversion_placed", bet_id=bet_id, **kw)
     update_reward_token(
         int(token_id), linked_conversion_bet_id=bet_id,
-        status=RewardTokenStatus.USED.value,
+        status=RewardTokenStatus.REDEEMED.value,
         used_at=datetime.now(timezone.utc).isoformat(), **kw,
     )
     reserve_for_bet(bet_id, None, opportunity.exchange_provider, 0, opportunity.lay_liability, db_path=db_path)
@@ -367,16 +375,75 @@ def confirm_qualifying_settlement(bet_id, outcome, actual=None, db_path=None):
     if new_status:
         update_bet_status(bet_id, new_status, **kw)
     release_for_bet(bet_id, db_path=db_path)
+    _settle_linked_rewards(bet_id, actual, result, db_path)
     return result
 
 
-def confirm_reward_received(promotion_id, token_ids, db_path=None) -> None:
+def _settle_linked_rewards(bet_id, actual, result, db_path):
+    """Move any reward converted by this bet to SETTLED and record realized P&L."""
+    from promotions import reward_canonical_status
+
     kw = _kw(db_path)
-    for token_id in token_ids:
+    now = datetime.now(timezone.utc).isoformat()
+    for token in list_reward_tokens(**kw):
+        if token["linked_conversion_bet_id"] != int(bet_id):
+            continue
+        if reward_canonical_status(token["status"]) != "REDEEMED":
+            continue
+        realized = None
+        if actual is not None and actual.actual_total_pnl is not None:
+            realized = actual.actual_total_pnl
+        elif getattr(result, "actual_pnl", None) is not None:
+            realized = result.actual_pnl
         update_reward_token(
-            int(token_id), status=RewardTokenStatus.RECEIVED.value,
-            received_at=datetime.now(timezone.utc).isoformat(), **kw,
+            token["id"], status=RewardTokenStatus.SETTLED.value,
+            settled_at=now,
+            realized_pnl=realized if realized is not None else token["face_value"],
+            **kw,
         )
+
+
+def confirm_reward_received(promotion_id, token_ids, expiry_hours=None, db_path=None) -> None:
+    kw = _kw(db_path)
+    now = datetime.now(timezone.utc)
+    expires_at = None
+    if expiry_hours:
+        from datetime import timedelta
+
+        expires_at = (now + timedelta(hours=int(expiry_hours))).isoformat()
+    for token_id in token_ids:
+        fields = dict(
+            status=RewardTokenStatus.CREDITED.value,
+            received_at=now.isoformat(),
+        )
+        if expires_at is not None:
+            fields["expires_at"] = expires_at
+        update_reward_token(int(token_id), **fields, **kw)
+
+
+def issue_reward_tokens(promotion, collection=None, db_path=None) -> list:
+    """Create the individual reward tokens for a promotion (idempotent).
+
+    Stable ``token_key`` values (``promotion:<id>:<reward_id>``) mean restarting
+    the app never duplicates or reissues rewards.
+    """
+    from promotions import collection_from_promotion
+
+    kw = _kw(db_path)
+    collection = collection or collection_from_promotion(promotion)
+    ids = []
+    for index, unit in enumerate(collection.rewards):
+        token = RewardToken(
+            promotion_id=promotion.id,
+            token_key=f"promotion:{promotion.id}:{unit.reward_id}",
+            face_value=unit.amount,
+            reward_type=collection.reward_type,
+            status=RewardTokenStatus.PENDING.value,
+            sequence=index,
+            group_key=f"promotion:{promotion.id}",
+        )
+        ids.append(create_reward_token(token, **kw))
+    return ids
 
 
 # --- realized / projected profit ---------------------------------------------

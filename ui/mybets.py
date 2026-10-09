@@ -6,7 +6,7 @@ import pandas as pd
 import streamlit as st
 
 from database import list_bets, list_promotion_actions, list_promotions, list_reward_tokens
-from promotions import promotion_from_row
+from promotions import collection_from_promotion, promotion_from_row, reward_canonical_status
 from services import calculate_net_profit, sync_workflow
 
 
@@ -52,10 +52,12 @@ def render():
             metrics[2].metric("Net realized", _money(net["realized_net"]))
             metrics[3].metric("Outstanding liability", _money(net["outstanding_liability"]))
 
-            reward_cols = st.columns(3)
-            reward_cols[0].metric("Reward tokens", len(tokens))
-            reward_cols[1].metric("Token outstanding", _money(net["token_outstanding"]))
-            reward_cols[2].metric("Pending conversion", _money(net["pending_conversion"]))
+            collection = collection_from_promotion(promotion)
+            reward_cols = st.columns(4)
+            reward_cols[0].metric("Rewards", f"{len(tokens)}" + (f" × {_money(collection.unit_amount)}" if collection.unit_amount is not None and collection.count > 1 else ""))
+            reward_cols[1].metric("Face value", _money(collection.total_face_value))
+            reward_cols[2].metric("Outstanding", _money(net["token_outstanding"]))
+            reward_cols[3].metric("Pending conversion", _money(net["pending_conversion"]))
 
             st.write("**Qualifying bets**")
             if qualifying:
@@ -87,8 +89,23 @@ def render():
             else:
                 st.caption("None recorded.")
 
-            st.write("**Reward tokens**")
+            st.write("**Rewards (individual bonus bets)**")
             if tokens:
-                st.dataframe(pd.DataFrame([dict(t) for t in tokens]), width="stretch", hide_index=True)
+                st.dataframe(
+                    pd.DataFrame(
+                        [
+                            {
+                                "Reward": (t["sequence"] + 1) if t["sequence"] is not None else "—",
+                                "Face": _money(t["face_value"]),
+                                "Type": t["reward_type"],
+                                "Status": reward_canonical_status(t["status"]),
+                                "Expires": (t["expires_at"] or "")[:19],
+                                "Realized": _money(t["realized_pnl"]) if t["realized_pnl"] is not None else "—",
+                            }
+                            for t in tokens
+                        ]
+                    ),
+                    width="stretch", hide_index=True,
+                )
             else:
-                st.caption("No tokens yet.")
+                st.caption("No rewards yet.")

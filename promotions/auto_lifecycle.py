@@ -126,8 +126,15 @@ def gather_facts(promotion_id, bets_by_id=None, db_path=None) -> PromotionFacts:
         (b["status"] or "Open") != "Open" for b in qualifying
     )
 
-    tokens_received = sum(1 for t in tokens if t["status"] in ("RECEIVED", "USED"))
-    used = [t for t in tokens if t["status"] == "USED"]
+    from .rewards import CREDITED_STATUSES, RewardStatus, canonical_status
+
+    tokens_received = sum(
+        1 for t in tokens if canonical_status(t["status"]) in CREDITED_STATUSES
+    )
+    used = [
+        t for t in tokens
+        if canonical_status(t["status"]) in (RewardStatus.REDEEMED.value, RewardStatus.SETTLED.value)
+    ]
     settled = 0
     for token in used:
         bet_id = token["linked_conversion_bet_id"]

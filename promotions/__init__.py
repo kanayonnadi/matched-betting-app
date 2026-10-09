@@ -86,6 +86,22 @@ from .ingestion import (
     sportsbook_from_url,
     terms_links,
 )
+from .rewards import (
+    ALL_REWARD_STATUSES,
+    LIFECYCLE_ORDER as REWARD_LIFECYCLE_ORDER,
+    RewardCollection,
+    RewardStatus,
+    RewardUnit,
+    apply_credit,
+    can_transition as reward_can_transition,
+    canonical_status as reward_canonical_status,
+    collection_from_promotion,
+)
+from .restrictions import (
+    RestrictionCheck,
+    StrategyCompliance,
+    evaluate_restrictions,
+)
 from .parser import american_to_decimal, parse_odds, parse_terms
 from .providers.base import PromotionProvider, RawPromotion
 from .providers.manual import ManualPromotionProvider
@@ -107,9 +123,21 @@ __all__ = [
     "IngestionStatus",
     "PageFetch",
     "TERMINAL_STATES",
+    "ALL_REWARD_STATUSES",
     "Candidate",
     "CandidateStatus",
     "EligibilityResult",
+    "REWARD_LIFECYCLE_ORDER",
+    "RestrictionCheck",
+    "RewardCollection",
+    "RewardStatus",
+    "RewardUnit",
+    "StrategyCompliance",
+    "apply_credit",
+    "collection_from_promotion",
+    "evaluate_restrictions",
+    "reward_can_transition",
+    "reward_canonical_status",
     "EligibilityState",
     "EligibilityStatus",
     "PromotionEvaluation",

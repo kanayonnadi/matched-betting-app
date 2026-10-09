@@ -10,17 +10,17 @@ from decimal import Decimal
 import streamlit as st
 
 from database import (
-    create_reward_token,
     get_promotion,
     list_promotions,
     list_reward_tokens,
 )
 from promotions import (
     IngestionStatus,
-    RewardToken,
+    collection_from_promotion,
     ingest_promotion,
     looks_like_url,
     promotion_from_row,
+    reward_canonical_status,
 )
 from services import (
     LiveDataUnavailable,
@@ -32,6 +32,7 @@ from services import (
     discover_conversion,
     discover_profitability,
     discover_qualifying,
+    issue_reward_tokens,
     parse_promotion,
     record_conversion_placed,
     record_qualifying_placed,
@@ -390,10 +391,12 @@ def _show_profitability(promotion, evaluation, qualifying_result, conversion_res
     q = evaluation.qualifying
     c = evaluation.conversion
     reward = evaluation.reward_amount
+    if evaluation.reward_count > 1:
+        reward_line = f"receive {_money(reward)} in {evaluation.reward_count} bonus bets"
+    else:
+        reward_line = f"receive {_money(reward)} free bet"
     st.markdown(
-        f"**Promotion:** {promotion.sportsbook} — Bet {_money(q.back_stake)}, "
-        f"receive {_money(reward)} free bet"
-        + (" ×{0}".format(evaluation.reward_count) if evaluation.reward_count > 1 else "")
+        f"**Promotion:** {promotion.sportsbook} — Bet {_money(q.back_stake)}, {reward_line}"
     )
     st.caption(
         _status_badge(
@@ -428,6 +431,47 @@ def _show_profitability(promotion, evaluation, qualifying_result, conversion_res
         cc.write(f"Fee: `{_money(c.lay_fee)}` · depth **{c.depth_status or 'UNKNOWN'}**")
     else:
         st.warning(evaluation.conversion_note)
+
+    plan = getattr(evaluation, "reward_plan", ()) or ()
+    if len(plan) > 1:
+        st.markdown(
+            f"**Reward: {evaluation.reward_count} individual bonus bets** · "
+            f"total face value {_money(evaluation.reward_amount)}"
+        )
+        st.dataframe(
+            [
+                {
+                    "Reward": rc.reward_id.replace("reward_", "#"),
+                    "Face": _money(rc.amount),
+                    "Conversion": (
+                        f"{rc.conversion_rate:.1f}%"
+                        if rc.conversion_rate is not None
+                        else ("—" if rc.opportunity is None else "n/a")
+                    ),
+                    "Worst-case": _money(rc.worst_case) if rc.opportunity is not None else "—",
+                    "Depth": rc.depth_status or "UNKNOWN",
+                    "State": "verified" if rc.verified else ("reused" if rc.reused else "unverified"),
+                }
+                for rc in plan
+            ],
+            width="stretch",
+            hide_index=True,
+        )
+        if evaluation.unconverted_face_value:
+            st.warning(
+                f"Unconverted reward value {_money(evaluation.unconverted_face_value)} "
+                "is not counted as profit."
+            )
+        if evaluation.worst_case_total is None and evaluation.conditional_worst_case_total is not None:
+            st.info(
+                "Conditional projected total (only if repeated-market previews hold): "
+                f"{_money(evaluation.conditional_worst_case_total)}"
+            )
+        if evaluation.strategy_compliance == "RESTRICTED":
+            st.error(
+                "Operator general terms restrict minimal-risk/matched betting. These numbers "
+                "are a hypothetical, non-compliant illustration only — do not act on them."
+            )
 
     st.markdown("**Total projected promotion result**")
     m1, m2, m3, m4 = st.columns(4)
@@ -611,41 +655,52 @@ def _confirm_steps(promotion):
             result = confirm_qualifying_settlement(int(last_bet), outcome, actual)
             st.success(f"{result.status}: {result.message}")
 
-    st.write("**Free bet received**")
+    st.write("**Bonus bets / rewards**")
     tokens = list_reward_tokens(promotion.id)
-    pending = [t for t in tokens if t["status"] == "PENDING"]
+    pending = [t for t in tokens if reward_canonical_status(t["status"]) == "PENDING"]
+    collection = collection_from_promotion(promotion)
     if not tokens:
-        cols2 = st.columns(2)
-        count = cols2[0].number_input(
-            "Reward tokens", min_value=1, value=int(promotion.reward_count or 1), key="pf_tokcount"
-        )
-        if cols2[1].button("Create reward tokens", key="pf_create_tokens"):
-            if promotion.reward_amount is None:
-                st.error("Reward amount unknown.")
-            else:
-                for index in range(int(count)):
-                    create_reward_token(
-                        RewardToken(
-                            promotion_id=promotion.id,
-                            token_key=f"auto-{promotion.id}-{index}",
-                            face_value=promotion.reward_token_amount,
-                            reward_type=promotion.reward_type or "FREE_BET_SNR",
-                        )
-                    )
-                st.success("Reward tokens created (pending).")
+        if collection.count == 0:
+            st.info("Reward amount/denomination unknown; confirm terms first.")
+        else:
+            st.caption(
+                f"Will create {collection.count} reward(s) from the parsed terms "
+                f"({_money(collection.total_face_value)} total)."
+            )
+            if st.button("Create reward tokens", key="pf_create_tokens"):
+                issue_reward_tokens(promotion)
+                st.success(f"Created {collection.count} reward(s) (pending).")
     else:
         st.dataframe(
-            [{"Face": t["face_value"], "Type": t["reward_type"], "Status": t["status"]} for t in tokens]
+            [
+                {
+                    "Reward": (t["sequence"] + 1) if t["sequence"] is not None else t["id"],
+                    "Face": _money(t["face_value"]),
+                    "Type": t["reward_type"],
+                    "Status": reward_canonical_status(t["status"]),
+                    "Expires": (t["expires_at"] or "")[:10],
+                }
+                for t in tokens
+            ],
+            width="stretch",
+            hide_index=True,
         )
-        if pending and st.button("Free bet received", key="pf_reward"):
-            confirm_reward_received(promotion.id, [t["id"] for t in pending])
-            st.success("Reward marked received.")
+        if pending and st.button("Rewards credited", key="pf_reward"):
+            confirm_reward_received(
+                promotion.id, [t["id"] for t in pending],
+                expiry_hours=promotion.reward_expiry_hours,
+            )
+            st.success("Rewards marked credited.")
 
 
 def _find_conversion(promotion, mode):
     st.subheader("4 · Find a conversion bet")
     tokens = list_reward_tokens(promotion.id)
-    available = [t for t in tokens if t["status"] in ("RECEIVED", "USED") and t["face_value"]]
+    available = [
+        t for t in tokens
+        if reward_canonical_status(t["status"]) in ("CREDITED", "RESERVED", "REDEEMED")
+        and t["face_value"]
+    ]
     if not available:
         st.caption("Confirm a received reward token first.")
         return

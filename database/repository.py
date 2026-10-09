@@ -329,6 +329,14 @@ def _bool_int(value):
     return None if value is None else (1 if value else 0)
 
 
+def _iso(value):
+    if value is None:
+        return None
+    if isinstance(value, (datetime, date)):
+        return value.isoformat()
+    return value
+
+
 def create_promotion(promotion, db_path=DB_PATH) -> int:
     now = datetime.now().isoformat(timespec="seconds")
     with get_connection(db_path) as connection:
@@ -340,8 +348,9 @@ def create_promotion(promotion, db_path=DB_PATH) -> int:
              confidence,eligibility,expires_at,lifecycle_status,official_source_url,
              terms_source_url,terms_verified_at,effective_date,withdrawal_restrictions,
              wagering_requirement_text,min_deposit,max_qualifying_stake,eligible_markets,
-             pre_match_only)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+             pre_match_only,reward_unit_amount,reward_denominations,reward_expiry_hours,
+             reward_issue_after_settlement,reward_restrictions)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (
                 now, now,
                 getattr(promotion, "sportsbook", None),
@@ -374,6 +383,13 @@ def create_promotion(promotion, db_path=DB_PATH) -> int:
                 _float(getattr(promotion, "max_qualifying_stake", None)),
                 ",".join(getattr(promotion, "eligible_markets", ()) or ()),
                 _bool_int(getattr(promotion, "pre_match_only", None)),
+                _float(getattr(promotion, "reward_unit_amount", None)),
+                ",".join(
+                    str(value) for value in (getattr(promotion, "reward_denominations", ()) or ())
+                ),
+                getattr(promotion, "reward_expiry_hours", None),
+                _bool_int(getattr(promotion, "reward_issue_after_settlement", None)),
+                "|".join(getattr(promotion, "reward_restrictions", ()) or ()),
             ),
         )
         return int(cursor.lastrowid)
@@ -409,6 +425,8 @@ def update_promotion(promotion_id, db_path=DB_PATH, **fields) -> None:
         "effective_date", "withdrawal_restrictions", "wagering_requirement_text",
         "min_deposit", "max_qualifying_stake", "expires_at", "status", "lifecycle_status",
         "eligibility", "workflow_state", "eligible_markets", "pre_match_only",
+        "reward_unit_amount", "reward_denominations", "reward_expiry_hours",
+        "reward_issue_after_settlement", "reward_restrictions",
     }
     updates = {}
     for key, value in fields.items():
@@ -522,8 +540,9 @@ def create_reward_token(token, db_path=DB_PATH) -> int:
             """INSERT OR IGNORE INTO promotion_reward_tokens
             (created_at,promotion_id,token_key,face_value,reward_type,eligible_markets,
              received_at,expires_at,used_at,status,linked_qualifying_bet_id,
-             linked_conversion_bet_id,realized_value,note)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+             linked_conversion_bet_id,realized_value,note,sequence,group_key,
+             reserved_at,settled_at,voided_at,realized_pnl)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (
                 now, int(token.promotion_id), key, _float(token.face_value), token.reward_type,
                 json.dumps(list(token.eligible_markets or ())),
@@ -532,6 +551,11 @@ def create_reward_token(token, db_path=DB_PATH) -> int:
                 token.used_at.isoformat() if token.used_at else None,
                 token.status, token.linked_qualifying_bet_id, token.linked_conversion_bet_id,
                 _float(token.realized_value), getattr(token, "note", None),
+                getattr(token, "sequence", None), getattr(token, "group_key", None),
+                _iso(getattr(token, "reserved_at", None)),
+                _iso(getattr(token, "settled_at", None)),
+                _iso(getattr(token, "voided_at", None)),
+                _float(getattr(token, "realized_pnl", None)),
             ),
         )
         if cursor.rowcount == 1:
@@ -565,7 +589,8 @@ def update_reward_token(token_id, db_path=DB_PATH, **fields) -> None:
     allowed = {
         "face_value", "reward_type", "eligible_markets", "received_at", "expires_at",
         "used_at", "status", "linked_qualifying_bet_id", "linked_conversion_bet_id",
-        "realized_value", "note",
+        "realized_value", "note", "sequence", "group_key", "reserved_at", "settled_at",
+        "voided_at", "realized_pnl",
     }
     updates = {key: value for key, value in fields.items() if key in allowed}
     if not updates:

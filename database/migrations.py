@@ -552,6 +552,32 @@ def _promotion_eligibility_columns(connection) -> None:
         connection.execute("ALTER TABLE promotions ADD COLUMN pre_match_only INTEGER")
 
 
+def _split_reward_columns(connection) -> None:
+    promotion_columns = (
+        ("reward_unit_amount", "REAL"),
+        ("reward_denominations", "TEXT"),
+        ("reward_expiry_hours", "INTEGER"),
+        ("reward_issue_after_settlement", "INTEGER"),
+        ("reward_restrictions", "TEXT"),
+    )
+    for name, ddl in promotion_columns:
+        if not _column_exists(connection, "promotions", name):
+            connection.execute(f"ALTER TABLE promotions ADD COLUMN {name} {ddl}")
+    token_columns = (
+        ("sequence", "INTEGER"),
+        ("reserved_at", "TEXT"),
+        ("settled_at", "TEXT"),
+        ("voided_at", "TEXT"),
+        ("realized_pnl", "REAL"),
+        ("group_key", "TEXT"),
+    )
+    for name, ddl in token_columns:
+        if not _column_exists(connection, "promotion_reward_tokens", name):
+            connection.execute(
+                f"ALTER TABLE promotion_reward_tokens ADD COLUMN {name} {ddl}"
+            )
+
+
 MIGRATIONS = (
     (1, "baseline tables", _baseline),
     (2, "bet selection and source", _add_bet_selection_and_source),
@@ -567,6 +593,7 @@ MIGRATIONS = (
     (12, "bankroll reservations", _reservations_table),
     (13, "promotion workflow state", _promotion_workflow_column),
     (14, "promotion eligibility columns", _promotion_eligibility_columns),
+    (15, "split reward columns", _split_reward_columns),
 )
 
 
