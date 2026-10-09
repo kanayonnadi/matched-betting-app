@@ -166,9 +166,12 @@ def _render_ingestion():
                 terms_text=result.text,
             )
             st.session_state["pf_selected"] = promotion_id
+            # ``pf_ingest`` is not a widget-owned key; clearing it is safe here.
+            # ``book_key`` IS widget-owned and must not be mutated after its
+            # widget has been instantiated in this run (it is reset earlier,
+            # before the widget is created, when a new link is ingested).
             st.session_state.pop("pf_ingest", None)
-            st.session_state.pop(book_key, None)
-            st.success(
+            st.session_state["pf_flash"] = (
                 f"Saved promotion #{promotion_id} from link. Review conditions, "
                 "confirm eligibility, then find a bet below."
             )
@@ -189,12 +192,19 @@ def _quick_input():
         ),
     )
     book_hint = st.text_input("Sportsbook (optional; only if not auto-detected)", key="pf_book_hint")
+    flash = st.session_state.pop("pf_flash", None)
+    if flash:
+        st.success(flash)
     if st.button("Find Opportunities", type="primary", key="pf_go"):
         value = text.strip()
         if looks_like_url(value):
-            st.session_state["pf_ingest"] = ingest_promotion(
+            result = ingest_promotion(
                 value, sportsbook_override=book_hint.strip() or None
             )
+            st.session_state["pf_ingest"] = result
+            # Reset the confirmation field BEFORE its widget is instantiated in
+            # this run, so we never mutate a widget-owned key after creation.
+            st.session_state["pf_ingest_book"] = result.sportsbook or book_hint.strip() or ""
             st.session_state.pop("pf_missing", None)
         else:
             st.session_state.pop("pf_ingest", None)
@@ -457,9 +467,65 @@ def _show_profitability(promotion, evaluation, qualifying_result, conversion_res
         _show_discovery(conversion_result)
 
 
+def _profitability_signature(promotion, mode):
+    """Inputs whose change must invalidate a stored profitability result."""
+    return (
+        mode,
+        promotion.id,
+        str(promotion.offer_type),
+        str(promotion.qualifying_stake),
+        str(promotion.qualifying_min_odds),
+        str(promotion.qualifying_max_odds),
+        str(promotion.reward_amount),
+        str(promotion.reward_type),
+        str(promotion.reward_count),
+        str(promotion.stake_returned),
+        str(promotion.eligible_markets),
+        promotion.status,
+        promotion.eligibility,
+    )
+
+
+def _clear_profitability():
+    for key in (
+        "pf_profitability_result",
+        "pf_profitability_q",
+        "pf_profitability_c",
+        "pf_profitability_signature",
+    ):
+        st.session_state.pop(key, None)
+
+
+def _invalidate_on_context_change(promotion_id, mode):
+    """Drop derived results when the promotion or odds source changes.
+
+    Prevents stale qualifying/conversion/profitability output from being shown
+    after the user switches promotion or toggles LIVE/DEMO.
+    """
+    context = (promotion_id, mode)
+    if st.session_state.get("pf_active_context") != context:
+        st.session_state["pf_active_context"] = context
+        _clear_profitability()
+        for key in ("pf_q_result", "pf_q", "pf_c_result", "pf_c"):
+            st.session_state.pop(key, None)
+
+
 def _profitability_summary(promotion, mode, force=False):
     st.subheader("1 · Projected promotion profitability")
-    if st.button("Evaluate complete promotion profitability", key="pf_prof", type="primary") or force:
+    signature = _profitability_signature(promotion, mode)
+    # Invalidate a stored result when the promotion or its terms/mode changed.
+    if (
+        st.session_state.get("pf_profitability_result") is not None
+        and st.session_state.get("pf_profitability_signature") != signature
+    ):
+        _clear_profitability()
+
+    clicked = st.button(
+        "Evaluate complete promotion profitability",
+        key="pf_prof_evaluate",
+        type="primary",
+    )
+    if clicked or force:
         try:
             evaluation, q_result, c_result = discover_profitability(
                 promotion, mode, balances=_bankroll_available()
@@ -467,13 +533,13 @@ def _profitability_summary(promotion, mode, force=False):
         except LiveDataUnavailable as exc:
             st.error(str(exc))
             return
-        st.session_state["pf_prof"] = evaluation
-        st.session_state["pf_prof_q"] = q_result
-        st.session_state["pf_prof_c"] = c_result
-        st.session_state["pf_prof_id"] = promotion.id
-    evaluation = st.session_state.get("pf_prof")
-    if evaluation is None or st.session_state.get("pf_prof_id") != promotion.id:
-        evaluation = None
+        # Non-widget keys only: never write to a key owned by a widget.
+        st.session_state["pf_profitability_result"] = evaluation
+        st.session_state["pf_profitability_q"] = q_result
+        st.session_state["pf_profitability_c"] = c_result
+        st.session_state["pf_profitability_signature"] = signature
+
+    evaluation = st.session_state.get("pf_profitability_result")
     if evaluation is None:
         st.caption(
             "Runs the live qualifying search and a conversion preview in one step. "
@@ -483,8 +549,8 @@ def _profitability_summary(promotion, mode, force=False):
     _show_profitability(
         promotion,
         evaluation,
-        st.session_state.get("pf_prof_q"),
-        st.session_state.get("pf_prof_c"),
+        st.session_state.get("pf_profitability_q"),
+        st.session_state.get("pf_profitability_c"),
     )
 
 
@@ -639,6 +705,7 @@ def render():
     promotion, _rows = _promotion_selector()
     if promotion is None:
         return
+    _invalidate_on_context_change(promotion.id, mode)
     _profitability_summary(promotion, mode)
     _find_qualifying(promotion, mode)
     _confirm_steps(promotion)
