@@ -41,6 +41,9 @@ class PromotionFacts:
 def terms_complete(promotion: Promotion) -> bool:
     for name in CRITICAL_TERMS:
         if getattr(promotion, name, None) is None:
+            # A user-confirmed "no minimum odds stated" satisfies the min-odds term.
+            if name == "qualifying_min_odds" and getattr(promotion, "no_min_odds", None):
+                continue
             return False
     if (promotion.reward_count or 0) < 1:
         return False

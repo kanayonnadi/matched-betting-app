@@ -349,8 +349,8 @@ def create_promotion(promotion, db_path=DB_PATH) -> int:
              terms_source_url,terms_verified_at,effective_date,withdrawal_restrictions,
              wagering_requirement_text,min_deposit,max_qualifying_stake,eligible_markets,
              pre_match_only,reward_unit_amount,reward_denominations,reward_expiry_hours,
-             reward_issue_after_settlement,reward_restrictions)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+             reward_issue_after_settlement,reward_restrictions,no_min_odds)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (
                 now, now,
                 getattr(promotion, "sportsbook", None),
@@ -390,6 +390,7 @@ def create_promotion(promotion, db_path=DB_PATH) -> int:
                 getattr(promotion, "reward_expiry_hours", None),
                 _bool_int(getattr(promotion, "reward_issue_after_settlement", None)),
                 "|".join(getattr(promotion, "reward_restrictions", ()) or ()),
+                _bool_int(getattr(promotion, "no_min_odds", None)),
             ),
         )
         return int(cursor.lastrowid)
@@ -426,7 +427,7 @@ def update_promotion(promotion_id, db_path=DB_PATH, **fields) -> None:
         "min_deposit", "max_qualifying_stake", "expires_at", "status", "lifecycle_status",
         "eligibility", "workflow_state", "eligible_markets", "pre_match_only",
         "reward_unit_amount", "reward_denominations", "reward_expiry_hours",
-        "reward_issue_after_settlement", "reward_restrictions",
+        "reward_issue_after_settlement", "reward_restrictions", "no_min_odds",
     }
     updates = {}
     for key, value in fields.items():

@@ -113,6 +113,8 @@ class Promotion:
     reward_expiry_hours: Optional[int] = None
     reward_issue_after_settlement: Optional[bool] = None
     reward_restrictions: Tuple[str, ...] = ()
+    # User-confirmed: the promotion specific terms state no minimum odds.
+    no_min_odds: Optional[bool] = None
     eligible_sports: Tuple[str, ...] = ()
     eligible_markets: Tuple[str, ...] = ()
     excluded_markets: Tuple[str, ...] = ()

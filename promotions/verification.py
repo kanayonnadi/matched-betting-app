@@ -42,6 +42,8 @@ def review_issues(promotion: Promotion) -> Tuple[str, ...]:
     issues = []
     for name in CRITICAL_TERMS:
         if getattr(promotion, name, None) is None:
+            if name == "qualifying_min_odds" and getattr(promotion, "no_min_odds", None):
+                continue
             issues.append(f"missing {_REVIEW_LABELS.get(name, name)}")
     if (promotion.reward_count or 0) < 1:
         issues.append("reward token count must be at least 1")

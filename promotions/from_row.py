@@ -58,6 +58,9 @@ def promotion_from_row(row) -> Promotion:
         reward_restrictions=tuple(
             part for part in (str(optional("reward_restrictions") or "").split("|")) if part
         ),
+        no_min_odds=(
+            _bool(optional("no_min_odds")) if "no_min_odds" in row.keys() else None
+        ),
         source_url=row["source_url"],
         terms_text=row["terms_text"],
         status=row["status"],

@@ -559,6 +559,7 @@ def _split_reward_columns(connection) -> None:
         ("reward_expiry_hours", "INTEGER"),
         ("reward_issue_after_settlement", "INTEGER"),
         ("reward_restrictions", "TEXT"),
+        ("no_min_odds", "INTEGER"),
     )
     for name, ddl in promotion_columns:
         if not _column_exists(connection, "promotions", name):
@@ -578,6 +579,11 @@ def _split_reward_columns(connection) -> None:
             )
 
 
+def _no_min_odds_column(connection) -> None:
+    if not _column_exists(connection, "promotions", "no_min_odds"):
+        connection.execute("ALTER TABLE promotions ADD COLUMN no_min_odds INTEGER")
+
+
 MIGRATIONS = (
     (1, "baseline tables", _baseline),
     (2, "bet selection and source", _add_bet_selection_and_source),
@@ -594,6 +600,7 @@ MIGRATIONS = (
     (13, "promotion workflow state", _promotion_workflow_column),
     (14, "promotion eligibility columns", _promotion_eligibility_columns),
     (15, "split reward columns", _split_reward_columns),
+    (16, "no-min-odds confirmation column", _no_min_odds_column),
 )
 
 

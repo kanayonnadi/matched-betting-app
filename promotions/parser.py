@@ -20,6 +20,7 @@ WORD_NUMBERS = {
     "eight": 8, "nine": 9, "ten": 10,
 }
 
+_COUNT = r"\d+|one|two|three|four|five|six|seven|eight|nine|ten|a|an"
 _REWARD_NOUN = (
     r"(?:sports\s+bonus\s+bets?|sports\s+bets?|free\s+bets?|bonus\s+bets?|"
     r"bonus\s+credits?|bets?)"
@@ -27,33 +28,51 @@ _REWARD_NOUN = (
 # Matches "five $20 free bets", "5 x $20 bonus bets", "a $20 free bet",
 # "two $25 bets and one $50 bet".
 _DENOM_RE = re.compile(
-    r"(?P<count>\d+|one|two|three|four|five|six|seven|eight|nine|ten|a|an)"
+    r"(?P<count>" + _COUNT + r")"
     r"\s*(?:x|×|\*)?\s*(?:\$|cad\s*\$?)?(?P<amount>\d+(?:\.\d+)?)\s*"
     + _REWARD_NOUN
 )
+# Matches "five (5) Sports Bonus Bets valued at $20.00 each" / "worth $20".
+_VALUED_RE = re.compile(
+    r"(?P<count>" + _COUNT + r")\s*(?:\(\s*\d+\s*\))?\s*"
+    r"(?:sports\s+|bonus\s+|free\s+)*bets?\s+(?:valued\s+at|worth|each\s+valued\s+at)\s+"
+    r"\$?(?P<amount>\d+(?:\.\d+)?)",
+    re.IGNORECASE,
+)
+# Matches "five (5) $20 bonus bets".
+_PAREN_RE = re.compile(
+    r"(?P<count>" + _COUNT + r")\s*\(\s*\d+\s*\)\s*\$?(?P<amount>\d+(?:\.\d+)?)"
+)
+_DENOM_PATTERNS = (_VALUED_RE, _DENOM_RE, _PAREN_RE)
 _EXPIRY_HOURS_RE = re.compile(r"expire[s]?\s*(?:after|within|in)?\s*(\d+)\s*hours?")
 _ISSUE_AFTER_RE = re.compile(
-    r"(?:issued|credited|awarded|paid|received|delivered|available)"
-    r"[^.]{0,40}?(?:after|once|when)[^.]{0,40}?(?:settle|qualifying|wager)"
+    r"(?:after|upon|once|when)\b[^.]{0,60}?(?:settle|settlement|qualifying\s+wager)"
 )
 
 
-def _parse_reward_denominations(lower: str) -> Tuple[Decimal, ...]:
-    """Extract individual reward amounts from "five $20 free bets" style text."""
+def _expand_denominations(pattern, lower: str) -> Tuple[Decimal, ...]:
     amounts = []
-    for match in _DENOM_RE.finditer(lower):
+    for match in pattern.finditer(lower):
         raw_count = match.group("count")
-        if raw_count in ("a", "an"):
-            count = 1
-        else:
-            count = _word_or_int(raw_count)
+        count = 1 if raw_count in ("a", "an") else _word_or_int(raw_count)
         amount = _decimal(match.group("amount"))
         if count is None or amount is None or amount <= 0:
             continue
-        # Guard against capturing the qualifying "$10 bet" (singular without a
-        # count word is only accepted as the implied "a $20 free bet" form).
         amounts.extend([amount] * count)
     return tuple(amounts)
+
+
+def _parse_reward_denominations(lower: str) -> Tuple[Decimal, ...]:
+    """Extract individual reward amounts from split-reward phrasing.
+
+    Tries the most specific phrasing first ("five (5) Sports Bonus Bets valued at
+    $20.00 each"), then "five $20 free bets", then "five (5) $20 bonus bets".
+    """
+    for pattern in _DENOM_PATTERNS:
+        amounts = _expand_denominations(pattern, lower)
+        if amounts:
+            return amounts
+    return ()
 
 
 def _word_or_int(token: str) -> Optional[int]:
@@ -209,9 +228,19 @@ def parse_terms(text: str) -> PromotionTerms:
         stake_returned = True
 
     new_customer_only = None
-    if "new customer" in lower or "new ontario customer" in lower or "new customers" in lower:
+    if (
+        "new customer" in lower
+        or "new ontario customer" in lower
+        or "new customers" in lower
+        or "not previously been registered" in lower
+        or "not previously registered" in lower
+        or "new player" in lower
+        or "new players" in lower
+        or "first-time" in lower
+        or "first time" in lower
+    ):
         new_customer_only = True
-    elif "existing customer" in lower:
+    elif "existing customer" in lower or "existing customers" in lower:
         new_customer_only = False
 
     jurisdiction = None

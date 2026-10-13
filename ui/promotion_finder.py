@@ -13,14 +13,19 @@ from database import (
     get_promotion,
     list_promotions,
     list_reward_tokens,
+    set_promotion_eligibility,
+    update_promotion,
 )
 from promotions import (
+    EligibilityStatus,
     IngestionStatus,
     collection_from_promotion,
     ingest_promotion,
     looks_like_url,
     promotion_from_row,
+    review_issues,
     reward_canonical_status,
+    sync_promotion_lifecycle,
 )
 from services import (
     LiveDataUnavailable,
@@ -554,6 +559,63 @@ def _invalidate_on_context_change(promotion_id, mode):
             st.session_state.pop(key, None)
 
 
+def _confirm_terms_inline(promotion):
+    """Explicitly confirm parsed terms and account eligibility (never assumed)."""
+    issues = review_issues(promotion)
+    if not issues and promotion.eligibility == EligibilityStatus.ELIGIBLE.value:
+        return
+    with st.expander("Confirm terms & eligibility (required before search)", expanded=True):
+        st.caption(
+            "The app never assumes these. Confirm them from the operator's terms; "
+            "nothing is invented. Account eligibility is your assertion."
+        )
+        if issues:
+            st.warning("Needs review: " + "; ".join(issues))
+        cols = st.columns(3)
+        min_default = "" if promotion.qualifying_min_odds is None else str(promotion.qualifying_min_odds)
+        min_odds = cols[0].text_input(
+            "Minimum odds (blank if none stated)", value=min_default, key=f"pf_min_{promotion.id}"
+        )
+        no_min = cols[1].checkbox(
+            "Terms state no minimum odds", value=bool(promotion.no_min_odds), key=f"pf_nomin_{promotion.id}"
+        )
+        stake_options = ["Unknown", "No (stake not returned)", "Yes (stake returned)"]
+        stake_index = {None: 0, False: 1, True: 2}.get(promotion.stake_returned, 0)
+        stake = cols[2].selectbox(
+            "Stake returned?", stake_options, index=stake_index, key=f"pf_sr_{promotion.id}"
+        )
+        jurisdiction = st.text_input(
+            "Jurisdiction", value=promotion.jurisdiction or "Ontario", key=f"pf_jur_{promotion.id}"
+        )
+        eligible = st.checkbox(
+            "I confirm my account is eligible for this promotion",
+            key=f"pf_elig_{promotion.id}",
+        )
+        if st.button("Save terms & confirm eligibility", key=f"pf_confirm_{promotion.id}", type="primary"):
+            fields = {"jurisdiction": jurisdiction or None}
+            if no_min:
+                fields["no_min_odds"] = True
+                fields["qualifying_min_odds"] = None
+            elif min_odds.strip():
+                try:
+                    fields["qualifying_min_odds"] = Decimal(min_odds.strip())
+                except Exception:  # noqa: BLE001
+                    st.error("Minimum odds must be a number.")
+                    return
+                fields["no_min_odds"] = False
+            if stake != "Unknown":
+                fields["stake_returned"] = stake.startswith("Yes")
+            update_promotion(promotion.id, **fields)
+            if eligible:
+                set_promotion_eligibility(
+                    promotion.id, EligibilityStatus.ELIGIBLE.value, note="user confirmed"
+                )
+            sync_workflow(promotion.id)
+            sync_promotion_lifecycle(promotion.id)
+            st.success("Saved and re-synced. Re-run Evaluate to refresh.")
+            st.rerun()
+
+
 def _profitability_summary(promotion, mode, force=False):
     st.subheader("1 · Projected promotion profitability")
     signature = _profitability_signature(promotion, mode)
@@ -760,6 +822,7 @@ def render():
     promotion, _rows = _promotion_selector()
     if promotion is None:
         return
+    _confirm_terms_inline(promotion)
     _invalidate_on_context_change(promotion.id, mode)
     _profitability_summary(promotion, mode)
     _find_qualifying(promotion, mode)

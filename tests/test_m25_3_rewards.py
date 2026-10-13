@@ -469,3 +469,77 @@ def test_pipeline_flags_restricted_promotion_for_review():
     evaluation = evaluate_promotion(promotion, [])
     assert evaluation.status == CandidateStatus.REVIEW.value
     assert any("minimal-risk" in w or "restrict" in w for w in evaluation.warnings)
+
+
+# --- M25.3 fix: OLG phrasing + no-min-odds confirmation ----------------------
+
+OLG_TEXT = (
+    "PROLINE+ Bet $10 & Get $100 Promo. Upon Settlement of the Qualifying Wager, "
+    "five (5) Sports Bonus Bets valued at $20.00 each. Each Sports Bonus Bet expires "
+    "168 hours after being credited. Available only to Players who have not previously "
+    "been registered for a Player Account on OLG.ca, Ontario."
+)
+
+
+def test_parse_olg_valued_at_phrasing():
+    terms = parse_terms(OLG_TEXT)
+    assert terms.reward_count == 5
+    assert terms.reward_unit_amount == Decimal("20.00")
+    assert terms.reward_amount == Decimal("100")
+    assert terms.reward_expiry_hours == 168
+    assert terms.reward_issue_after_settlement is True
+    assert terms.new_customer_only is True
+    assert terms.jurisdiction == "Ontario"
+
+
+def test_no_min_odds_confirmation_satisfies_review_and_lifecycle(tmp_path):
+    from database import update_promotion
+    from promotions import review_issues, sync_promotion_lifecycle, terms_complete
+
+    db = tmp_path / "olg.db"
+    init_db(db)
+    promotion_id = save_promotion(
+        parse_terms(OLG_TEXT), "OLG Proline", "OLG", jurisdiction="Ontario", db_path=db
+    )
+    stored = promotion_from_row(get_promotion(promotion_id, db_path=db))
+    assert "missing minimum odds" in review_issues(stored)
+
+    update_promotion(promotion_id, no_min_odds=True, stake_returned=False, db_path=db)
+    set_promotion_eligibility(promotion_id, EligibilityStatus.ELIGIBLE.value, db_path=db)
+    sync_promotion_lifecycle(promotion_id, db_path=db)
+
+    stored = promotion_from_row(get_promotion(promotion_id, db_path=db))
+    assert review_issues(stored) == ()
+    assert terms_complete(stored)
+    assert stored.status == "ELIGIBILITY_CONFIRMED"
+
+
+def test_inline_term_confirmation_panel_renders(monkeypatch):
+    from streamlit.testing.v1 import AppTest
+
+    import ui.promotion_finder as pf
+
+    promotion = _promotion(qualifying_min_odds=None, no_min_odds=None)
+    row = {
+        "id": 1, "sportsbook": "OLG Proline", "name": "OLG", "jurisdiction": "Ontario",
+        "offer_type": "BET_GET", "new_customer_only": True,
+        "qualifying_stake": Decimal("10"), "qualifying_min_odds": None,
+        "qualifying_max_odds": None, "reward_amount": Decimal("100"),
+        "reward_type": "FREE_BET_SNR", "reward_count": 5, "stake_returned": None,
+        "reward_expiry_days": None, "source_url": None, "terms_text": None,
+        "status": "DISCOVERED", "confidence": 0.9, "eligibility": "Unknown",
+    }
+    monkeypatch.setattr(pf, "list_promotions", lambda *a, **k: [row])
+    monkeypatch.setattr(pf, "get_promotion", lambda *a, **k: row)
+    monkeypatch.setattr(pf, "sync_workflow", lambda *a, **k: "DRAFT")
+    monkeypatch.setattr(pf, "list_reward_tokens", lambda *a, **k: [])
+    monkeypatch.setattr(pf, "_bankroll_available", lambda: None)
+    monkeypatch.setattr(
+        pf, "calculate_net_profit",
+        lambda *a, **k: {"qualifying_loss": ZERO, "pending_conversion": ZERO,
+                         "realized_net": ZERO, "outstanding_liability": ZERO},
+    )
+    app = AppTest.from_file(str(Path(__file__).resolve().parent.parent / "app.py"), default_timeout=90)
+    app.run()
+    assert not app.exception, [str(e) for e in app.exception]
+    assert any(b.key == "pf_confirm_1" for b in app.button)
