@@ -1,0 +1,25 @@
+{
+  "label": "Captured example from the current app. This is a historical quotation, NOT a live market - do not trade on it.",
+  "event": "Los Angeles Rams vs Arizona Cardinals",
+  "sportsbook": "PROLINE+",
+  "selection": "Los Angeles Rams",
+  "back_odds": "1.10",
+  "back_stake": "10.00",
+  "stx": {
+    "market": "moneyline",
+    "max_price": "1.0000",
+    "best_bid": "0.84",
+    "available_contracts": "3401",
+    "completeness": "UNKNOWN",
+    "fee_side": "taker",
+    "tier": "Rookie"
+  },
+  "expected": {
+    "required_contracts": "11",
+    "lay_stake": "9.24",
+    "liability": "1.76",
+    "fee": "0.15",
+    "effective_lay_odds": "1.190",
+    "worst_case": "-0.91"
+  }
+}

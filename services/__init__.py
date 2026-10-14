@@ -48,6 +48,20 @@ from .promotion_workflow import (
     record_qualifying_placed,
     save_promotion,
 )
+from .verification import (
+    ExecutionReconciliation,
+    EquivalenceResult,
+    FeeSchedule,
+    Tolerances,
+    VerificationResult,
+    VerificationStatus,
+    outcome_pnl,
+    reconcile_execution,
+    required_contracts,
+    verify_market_equivalence,
+    verify_opportunity,
+    walk_levels,
+)
 from .workflow import WorkflowState, derive_state, progress_index, sync_workflow
 
 __all__ = [
@@ -59,6 +73,18 @@ __all__ = [
     "Recommendation",
     "WorkflowState",
     "ProfitView",
+    "ExecutionReconciliation",
+    "EquivalenceResult",
+    "FeeSchedule",
+    "Tolerances",
+    "VerificationResult",
+    "VerificationStatus",
+    "outcome_pnl",
+    "reconcile_execution",
+    "required_contracts",
+    "verify_market_equivalence",
+    "verify_opportunity",
+    "walk_levels",
     "BankrollRequirement",
     "ProfitabilityStatus",
     "PromotionProfitability",

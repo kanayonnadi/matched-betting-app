@@ -86,6 +86,10 @@ class Opportunity:
     source_type: str = "MOCK"
     is_live: bool = False
     provenance: Optional[object] = None
+    # Raw inputs retained for independent verification (M27).
+    order_book: Optional[object] = None
+    book_quote: Optional[object] = None
+    exchange_quote: Optional[object] = None
 
 
 def _validate_quotes(book_quote: NormalizedOdds, exchange_quote: ExchangeOdds) -> None:
@@ -239,4 +243,7 @@ def build_opportunity(
         requested_contracts=execution.requested_contracts if execution else None,
         executable_contracts=execution.fillable_contracts if execution else None,
         event_confidence=None,
+        order_book=order_book,
+        book_quote=book_quote,
+        exchange_quote=exchange_quote,
     )

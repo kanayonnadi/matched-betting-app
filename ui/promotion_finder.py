@@ -242,9 +242,9 @@ def _quick_input():
         st.warning("Confirm missing/essential terms: " + ", ".join(missing))
         terms = st.session_state.get("pf_terms")
         cols = st.columns(3)
-        book_c = cols[0].text_input("Sportsbook", value=st.session_state.get("pf_book") or "")
-        stake_c = cols[1].text_input("Qualifying stake", value=str(terms.qualifying_stake) if terms and terms.qualifying_stake else "")
-        reward_c = cols[2].text_input("Reward amount", value=str(terms.reward_amount) if terms and terms.reward_amount else "")
+        book_c = cols[0].text_input("Sportsbook", value=st.session_state.get("pf_book") or "", key="pf_miss_book")
+        stake_c = cols[1].text_input("Qualifying stake", value=str(terms.qualifying_stake) if terms and terms.qualifying_stake else "", key="pf_miss_stake")
+        reward_c = cols[2].text_input("Reward amount", value=str(terms.reward_amount) if terms and terms.reward_amount else "", key="pf_miss_reward")
         if st.button("Confirm & save", key="pf_confirm_save"):
             overrides = {
                 key: value
@@ -267,18 +267,18 @@ def _quick_input():
 def _enter_promotion():
     st.subheader("Advanced · edit structured promotion fields")
     with st.expander("Manual entry / corrections", expanded=False):
-        text = st.text_area("Promotion text", placeholder="Bet $10, get a $20 free bet. Minimum odds 1.50.")
+        text = st.text_area("Promotion text", placeholder="Bet $10, get a $20 free bet. Minimum odds 1.50.", key="pf_adv_text")
         cols = st.columns(3)
-        sportsbook = cols[0].text_input("Sportsbook")
-        name = cols[1].text_input("Offer name")
-        jurisdiction = cols[2].text_input("Jurisdiction", value="Ontario")
+        sportsbook = cols[0].text_input("Sportsbook", key="pf_adv_book")
+        name = cols[1].text_input("Offer name", key="pf_adv_name")
+        jurisdiction = cols[2].text_input("Jurisdiction", value="Ontario", key="pf_adv_jur")
         cols2 = st.columns(3)
-        stake = cols2[0].text_input("Qualifying stake (fallback)")
-        reward = cols2[1].text_input("Reward amount (fallback)")
-        min_odds = cols2[2].text_input("Min odds (fallback)")
+        stake = cols2[0].text_input("Qualifying stake (fallback)", key="pf_adv_stake")
+        reward = cols2[1].text_input("Reward amount (fallback)", key="pf_adv_reward")
+        min_odds = cols2[2].text_input("Min odds (fallback)", key="pf_adv_min")
         cols3 = st.columns(2)
-        official_url = cols3[0].text_input("Official promotion URL")
-        terms_url = cols3[1].text_input("Terms URL")
+        official_url = cols3[0].text_input("Official promotion URL", key="pf_adv_url")
+        terms_url = cols3[1].text_input("Terms URL", key="pf_adv_terms")
 
         if st.button("Parse promotion", key="pf_parse"):
             overrides = {}
@@ -702,8 +702,8 @@ def _confirm_steps(promotion):
     else:
         cols = st.columns(3)
         outcome = cols[0].selectbox("Settled outcome", OUTCOMES, key="pf_outcome")
-        fee = cols[1].text_input("Actual STX fee (optional)")
-        pnl = cols[2].text_input("Actual total P&L (optional)")
+        fee = cols[1].text_input("Actual STX fee (optional)", key="pf_actual_fee")
+        pnl = cols[2].text_input("Actual total P&L (optional)", key="pf_actual_pnl")
         if st.button("Qualifying bet settled", key="pf_confirm_settle"):
             actual = None
             if fee.strip() or pnl.strip():
@@ -767,7 +767,7 @@ def _find_conversion(promotion, mode):
         st.caption("Confirm a received reward token first.")
         return
     token_map = {f"#{t['id']} (${t['face_value']})": t for t in available}
-    label = st.selectbox("Token", list(token_map))
+    label = st.selectbox("Token", list(token_map), key="pf_token_select")
     token = token_map[label]
     if st.button("Find conversion opportunities", key="pf_find_c"):
         try:
@@ -807,16 +807,8 @@ def _result(promotion):
     )
 
 
-def render():
-    st.header("Find a Bet")
-    st.caption(
-        "Promotion-first workflow. This app never places wagers; links/records only. "
-        "Place every wager manually."
-    )
-    mode = st.radio("Odds source", MODES, horizontal=True)
-    if mode == "LIVE":
-        st.caption("LIVE mode uses The Odds API + production STX (consumes API quota). No mock fallback.")
-
+def _render_classic(mode):
+    """The detailed step-by-step tools, kept behind an advanced expander."""
     _quick_input()
     _enter_promotion()
     promotion, _rows = _promotion_selector()
@@ -829,3 +821,22 @@ def render():
     _confirm_steps(promotion)
     _find_conversion(promotion, mode)
     _result(promotion)
+
+
+def render():
+    st.header("Find a Bet")
+    st.caption(
+        "Three steps: enter a promotion, find a qualifying bet, then find promo bets. "
+        "This app never places wagers; it records and links only."
+    )
+    mode = st.radio("Odds source", MODES, horizontal=True)
+    if mode == "LIVE":
+        st.caption("LIVE mode uses The Odds API + production STX (consumes API quota). No mock fallback.")
+
+    from . import workflow
+
+    workflow.render(mode)
+
+    with st.expander("Advanced: step-by-step tools (classic)", expanded=False):
+        st.caption("Detailed controls and diagnostics. The three-step workflow above is recommended.")
+        _render_classic(mode)

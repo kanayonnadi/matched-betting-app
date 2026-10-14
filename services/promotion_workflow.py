@@ -204,8 +204,8 @@ def _provenance_summary(opportunity) -> dict:
                 "requested_contracts": str(getattr(execution, "requested_contracts", None)),
                 "executable_contracts": str(getattr(execution, "fillable_contracts", None)),
                 "book_age_seconds": str(getattr(execution, "book_age_seconds", None)),
-                "fee_model": "per_wager",
-                "fee_model_status": "EXTERNALLY_UNVERIFIED",
+                "fee_model": "per_wager (order-level ceil)",
+                "fee_model_status": "DOCUMENTED_FORMULA_ACCOUNT_TIER_ESTIMATED",
             }
         )
     return summary

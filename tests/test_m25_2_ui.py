@@ -250,7 +250,7 @@ def test_url_ingestion_then_profitability(monkeypatch):
     harness.install(monkeypatch)
     app = _run_app()
 
-    app.text_area[0].set_value("https://www.pointsbet.ca/promo")
+    next(t for t in app.text_area if t.key == "pf_text").set_value("https://www.pointsbet.ca/promo")
     app = _click(app, "pf_go")
     assert not app.exception, [str(e) for e in app.exception]
     assert app.session_state["pf_ingest"] is not None
