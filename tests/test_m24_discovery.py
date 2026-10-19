@@ -51,6 +51,12 @@ def test_resolve_bookmaker_unsupported_and_unknown():
     assert unknown.key is None and unknown.supported is False
 
 
+def test_playnow_is_not_an_ontario_book():
+    r = resolve_bookmaker("PlayNow")
+    assert r.supported is False
+    assert "Ontario" in r.reason
+
+
 # --- scoped discovery --------------------------------------------------------
 
 def test_discovery_is_scoped_to_promotion_bookmaker(monkeypatch):

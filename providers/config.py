@@ -4,7 +4,7 @@ Read from environment variables so no secrets live in source:
 
 * ``THE_ODDS_API_KEY``       - your The Odds API key (required to enable live)
 * ``THE_ODDS_API_BOOKMAKERS``- comma-separated bookmaker keys, one provider each
-  (e.g. ``playnow_ca,betmgm_ca_on,sportsinteraction_ca_on``)
+  (e.g. ``betmgm_ca_on,sportsinteraction_ca_on,betano_ca_on``)
 * ``THE_ODDS_API_BOOKMAKER`` - single-bookmaker fallback for the above
 * ``THE_ODDS_API_REGION``    - region, default ``us`` (use ``ca`` for Canada)
 * ``THE_ODDS_API_SPORTS``    - comma-separated sport keys, e.g.

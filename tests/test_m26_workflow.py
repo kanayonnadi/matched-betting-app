@@ -61,13 +61,14 @@ def _discovery(recs, mode="DEMO"):
 
 
 class Harness:
-    def __init__(self, *, row=None, with_qualifying=True, with_eval=True, tokens=None):
+    def __init__(self, *, row=None, with_qualifying=True, with_eval=True, tokens=None, qual_recs=None):
         self.row = row or _row()
         self.saved = []
         self.ingest_calls = []
         self.with_qualifying = with_qualifying
         self.with_eval = with_eval
         self.tokens = tokens if tokens is not None else []
+        self.qual_recs = qual_recs
 
     def _promotion(self, pid=None):
         return promotion_from_row({**self.row, "id": pid or self.row["id"]})
@@ -89,7 +90,11 @@ class Harness:
             wf, "confirm_qualifying_settlement",
             lambda *a, **k: type("R", (), {"status": "OK", "message": "settled"})(),
         )
-        monkeypatch.setattr(wf, "discover_qualifying", lambda promotion, mode, **k: _discovery([_qual_rec()] if self.with_qualifying else [], mode))
+        if self.qual_recs is not None:
+            qual_recs = list(self.qual_recs)
+        else:
+            qual_recs = [_qual_rec()] if self.with_qualifying else []
+        monkeypatch.setattr(wf, "discover_qualifying", lambda promotion, mode, **k: _discovery(list(qual_recs), mode))
         monkeypatch.setattr(wf, "_bankroll_available", lambda: None)
 
         def fake_eval(promotion, mode, **k):
@@ -308,6 +313,28 @@ def test_reward_credit_then_continue_and_promo_search(monkeypatch):
     app = _btn(app, "wf_c_search")
     assert not app.exception, [str(e) for e in app.exception]
     assert app.session_state.get("wf_c_eval") is not None
+
+
+def test_selecting_option_greys_out_others_and_reveals_next_step(monkeypatch):
+    two_recs = [
+        _recommendation(replace(discover_mock_opportunities(10)[0], fully_hedged=True)),
+        _recommendation(replace(discover_mock_opportunities(10)[1], fully_hedged=True)),
+    ]
+    harness = Harness(qual_recs=two_recs)
+    app = _approved_app(monkeypatch, harness)
+    app = _btn(app, "wf_q_search")
+    assert not app.exception, [str(e) for e in app.exception]
+    picks = {b.key: b for b in app.button if b.key.startswith("wf_q_pick_")}
+    assert set(picks) == {"wf_q_pick_0", "wf_q_pick_1"}
+    assert not any(b.disabled for b in picks.values())
+
+    app = _btn(app, "wf_q_pick_0")
+    picks = {b.key: b for b in app.button if b.key.startswith("wf_q_pick_")}
+    assert picks["wf_q_pick_0"].disabled is True
+    assert picks["wf_q_pick_0"].label == "Selected"
+    assert picks["wf_q_pick_1"].disabled is True  # other option greyed out
+    # The next-step box is revealed with its confirmation action.
+    assert any(b.key == "wf_q_confirm" for b in app.button)
 
 
 def test_recheck_opportunity_refreshes_without_crash(monkeypatch):

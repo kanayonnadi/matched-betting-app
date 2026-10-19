@@ -90,6 +90,48 @@ ZERO = Decimal("0")
 
 STAGES = (1, 2, 3)
 
+_STYLES = """
+<style>
+[class*="st-key-wf_opt_active_"] {
+    outline: 2px solid #ff4b4b;
+    outline-offset: 2px;
+    border-radius: 0.6rem;
+}
+[class*="st-key-wf_opt_dim_"] {
+    opacity: 0.42;
+    filter: grayscale(0.85);
+    transition: opacity 0.2s ease;
+}
+[class*="st-key-wf_place_box"] {
+    outline: 3px solid #ff4b4b;
+    outline-offset: 3px;
+    border-radius: 0.6rem;
+    animation: wf-pulse 1.8s ease-in-out infinite;
+}
+@keyframes wf-pulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(255, 75, 75, 0.18); }
+    50%      { box-shadow: 0 0 26px rgba(255, 75, 75, 0.55); }
+}
+.wf-arrow-hint {
+    text-align: center;
+    color: #ff4b4b;
+    font-weight: 800;
+    font-size: 1.3rem;
+    letter-spacing: 0.08em;
+    animation: wf-bounce 1.1s ease-in-out infinite;
+    margin: 0.15rem 0;
+}
+@keyframes wf-bounce {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(7px); }
+}
+</style>
+"""
+
+
+def _inject_workflow_styles():
+    st.html(_STYLES)
+
 
 def _empty_discovery(mode):
     from services.discovery import DiscoveryResult, OpportunityStatus
@@ -409,12 +451,22 @@ def _render_stage2(mode):
 
     result = st.session_state.get("wf_q_result")
     if result is not None:
+        selected = st.session_state.get("wf_q_selected")
         _show_discovery(result)
         recommendations = list(result.recommendations)
         if recommendations:
             st.markdown("**Top opportunities**")
+            if selected is None:
+                st.caption("Pick one option to continue. The others will be greyed out.")
             for index, rec in enumerate(recommendations[:3]):
-                with st.container(border=True):
+                is_selected = selected == index
+                if selected is None:
+                    card_key = f"wf_opt_{index}"
+                elif is_selected:
+                    card_key = f"wf_opt_active_{index}"
+                else:
+                    card_key = f"wf_opt_dim_{index}"
+                with st.container(border=True, key=card_key):
                     st.markdown(f"**Option {index + 1} · {rec.opportunity.event_label}**")
                     st.write(
                         f"{rec.opportunity.selection} · back `{rec.opportunity.back_odds:.2f}` · "
@@ -424,8 +476,12 @@ def _render_stage2(mode):
                     verification, line = _verify_line(rec)
                     st.caption(line)
                     b1, b2 = st.columns(2)
-                    if b1.button("Select This Bet", key=f"wf_q_pick_{index}"):
+                    if is_selected:
+                        b1.button("Selected", key=f"wf_q_pick_{index}", disabled=True, type="primary")
+                    elif b1.button("Select This Bet", key=f"wf_q_pick_{index}",
+                                   disabled=selected is not None):
                         st.session_state["wf_q_selected"] = index
+                        st.rerun()
                     if b2.button("View Calculations", key=f"wf_q_view_{index}"):
                         st.session_state["wf_q_view"] = index
                     if st.session_state.get("wf_q_view") == index:
@@ -461,8 +517,13 @@ def _render_stage2(mode):
     recommendations = list((result.recommendations if result else ()) or ())
     if selected is not None and selected < len(recommendations):
         rec = recommendations[selected]
-        with st.container(border=True):
-            st.markdown("**Place these two wagers manually**")
+        _inject_workflow_styles()
+        st.markdown(
+            '<div class="wf-arrow-hint">▼&nbsp;&nbsp;NEXT STEP&nbsp;&nbsp;▼</div>',
+            unsafe_allow_html=True,
+        )
+        with st.container(border=True, key="wf_place_box"):
+            st.markdown("### Place these two wagers manually")
             st.write(
                 f"1. Back **{rec.opportunity.selection}** at **{rec.opportunity.book_provider}** · "
                 f"stake `{_money(rec.opportunity.stake)}` @ `{rec.opportunity.back_odds:.2f}`"
@@ -471,7 +532,7 @@ def _render_stage2(mode):
                 f"2. Lay **{rec.opportunity.selection}** on **STX** · stake `{_money(rec.opportunity.lay_stake)}` "
                 f"@ `{rec.opportunity.lay_odds:.3f}` · liability `{_money(rec.opportunity.lay_liability)}`"
             )
-            if st.button("Confirm Qualifying Bet", key="wf_q_confirm"):
+            if st.button("Confirm Qualifying Bet", key="wf_q_confirm", type="primary"):
                 bet_id = record_qualifying_placed(promotion.id, rec.opportunity)
                 st.session_state["wf_q_bet"] = bet_id
                 st.success(f"Recorded bet #{bet_id}. Place the wagers manually; settlement is separate.")

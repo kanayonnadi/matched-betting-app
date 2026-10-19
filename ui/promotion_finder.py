@@ -109,7 +109,7 @@ def _detect_book(text):
     normalized = normalize_name(text or "")
     for candidate in (
         "bet365", "betmgm", "sports interaction", "pointsbet", "proline", "olg",
-        "playnow", "betano", "bet99", "betrivers",
+        "betano", "bet99", "betrivers",
     ):
         if candidate in normalized:
             return candidate

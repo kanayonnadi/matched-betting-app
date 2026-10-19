@@ -26,7 +26,6 @@ CA_BOOKMAKERS = (
     "betano_ca_on",
     "betmgm_ca_on",
     "betrivers_ca_on",
-    "playnow_ca",
     "pointsbetca",
     "proline_ca_on",
     "sportsinteraction_ca_on",

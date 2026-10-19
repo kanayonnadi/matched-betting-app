@@ -10,17 +10,23 @@ from typing import Optional
 
 from matching.normalize import normalize_name
 
-# The Odds API bookmaker keys available in the ``ca`` region.
+# The Odds API bookmaker keys that are Ontario-licensed and available in the
+# ``ca`` region. PlayNow (BCLC) is deliberately excluded: it is not an
+# iGO-licensed Ontario operator, so its quotes cannot be executed in Ontario.
 CA_BOOKMAKER_KEYS = (
     "bet99_ca_on",
     "betano_ca_on",
     "betmgm_ca_on",
     "betrivers_ca_on",
-    "playnow_ca",
     "pointsbetca",
     "proline_ca_on",
     "sportsinteraction_ca_on",
 )
+
+# Recognized operators that must never be offered for Ontario execution.
+JURISDICTION_EXCLUSIONS = {
+    "playnow_ca": "PlayNow (BCLC) is not available in Ontario",
+}
 
 # Display name / alias (normalized) -> bookmaker key.
 ALIASES = {
@@ -69,6 +75,8 @@ def resolve_bookmaker(name) -> BookmakerResolution:
     key = ALIASES.get(normalized)
     if key is None:
         return BookmakerResolution(str(name), None, False, f"unknown sportsbook '{name}'")
+    if key in JURISDICTION_EXCLUSIONS:
+        return BookmakerResolution(str(name), key, False, JURISDICTION_EXCLUSIONS[key])
     if key not in CA_BOOKMAKER_KEYS:
         return BookmakerResolution(
             str(name), key, False,
