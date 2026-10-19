@@ -77,7 +77,12 @@ def moneyline_market(event_id, position, bid_price=None, bid_qty=None, max_price
 
 
 def make_provider(markets):
-    return StxProvider("key", "unused", client=FakeStxClient(markets), clock=lambda: FIXED)
+    # Unit tests exercise REST conversion explicitly; production builds
+    # providers with require_ws_books=True.
+    return StxProvider(
+        "key", "unused", client=FakeStxClient(markets), clock=lambda: FIXED,
+        require_ws_books=False,
+    )
 
 
 def test_get_events_uses_participants_for_home_away():

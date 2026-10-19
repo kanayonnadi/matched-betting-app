@@ -1,0 +1,948 @@
+{
+  "sport": "Basketball",
+  "market_ids": [
+    "50a23523-b5ae-4060-a6da-7c6686559a44",
+    "8c829a72-5063-411c-bf27-fcc88e53b2f6",
+    "1c927594-fdc4-43c5-a59f-b7d8e8d32fd4",
+    "d577b964-08a3-4872-bb98-64ff6a114bc2",
+    "bae1c62f-1442-4e26-9add-55099b7111d7",
+    "649ebe4f-2844-422b-9d00-60ffe663408e",
+    "abea8874-21f4-4fe2-9a61-5f564851165c",
+    "3fee0723-b28b-43a2-9433-0fbd08dad64c",
+    "f3fae74b-f6e7-4af3-929b-4bac11f9411b",
+    "4fc01cbe-8c84-4924-8b8c-434e66fd6122",
+    "2e32e556-e8f6-4aa1-aaed-7a7f658b3dbb",
+    "8485ea13-7216-420d-8f68-afcc11639679",
+    "0b0334ec-5c14-4556-9e6c-f17938af31b6",
+    "2aa01543-c35b-48f9-94f5-545c5f66cf86",
+    "7094abfb-fa00-4fa5-8442-f525f543b0ab",
+    "889904ef-2c6d-4e4d-8efd-9ad344042bda",
+    "ca7969cc-c1eb-4e95-b1aa-d9be35c58904",
+    "2837e834-f13c-4acf-a6f5-e7cc2bf97232",
+    "c7bc77ee-105a-4311-aaaa-fe3fe4103583",
+    "16778b03-aaf6-4fa1-8f97-d6c2b1a5436c",
+    "a69c3420-a9a7-426f-9a61-23ef4f3d3d9b",
+    "1f1ee9f6-1a93-463f-bb71-4b254889b3b8",
+    "b87aa7f7-e1cb-4ad4-8af9-1f2795471bd1",
+    "8232fb7d-e299-4199-aec0-beecb4aa8a63",
+    "e6d8325f-41aa-4e32-8238-8d1b9e18b328",
+    "d3530c80-1732-4f37-8bc5-9a0580d4d54a",
+    "577a8dd1-e6e1-41bc-85fb-581f74d608c8",
+    "a5a56c45-993e-4f7c-9256-1085c794ed34",
+    "54fff386-db54-4bed-974f-13b37ec2c06f",
+    "6879f972-dd17-4351-9836-33f0e0c7f45c"
+  ],
+  "markets": {
+    "50a23523-b5ae-4060-a6da-7c6686559a44": {
+      "event_id": "68ef1a6e-f51b-4f4e-986c-4b468ffc1baf",
+      "event_title": "Atlanta Dream at Golden State Valkyries",
+      "event_start": "2026-10-20T00:00:00.000000Z",
+      "competition": "WNBA",
+      "grouping_name": "Moneyline",
+      "position": "Golden State Valkyries",
+      "title": "WNBA Playoff ATL @ GS",
+      "max_price": "1.0000",
+      "market_id": "50a23523-b5ae-4060-a6da-7c6686559a44",
+      "group_title": "Valkyries"
+    },
+    "8c829a72-5063-411c-bf27-fcc88e53b2f6": {
+      "event_id": "68ef1a6e-f51b-4f4e-986c-4b468ffc1baf",
+      "event_title": "Atlanta Dream at Golden State Valkyries",
+      "event_start": "2026-10-20T00:00:00.000000Z",
+      "competition": "WNBA",
+      "grouping_name": "Moneyline",
+      "position": "Atlanta Dream",
+      "title": "WNBA Playoff ATL @ GS",
+      "max_price": "1.0000",
+      "market_id": "8c829a72-5063-411c-bf27-fcc88e53b2f6",
+      "group_title": "Dream"
+    },
+    "1c927594-fdc4-43c5-a59f-b7d8e8d32fd4": {
+      "event_id": "0d1bc4eb-9846-4cd0-9d08-fa0f46226ffa",
+      "event_title": "Boston Celtics at Detroit Pistons",
+      "event_start": "2026-10-20T19:00:00.000000Z",
+      "competition": "NBA",
+      "grouping_name": "Moneyline",
+      "position": "Boston Celtics",
+      "title": "NBA BOS @ DET",
+      "max_price": "1.0000",
+      "market_id": "1c927594-fdc4-43c5-a59f-b7d8e8d32fd4",
+      "group_title": "Celtics"
+    },
+    "d577b964-08a3-4872-bb98-64ff6a114bc2": {
+      "event_id": "0d1bc4eb-9846-4cd0-9d08-fa0f46226ffa",
+      "event_title": "Boston Celtics at Detroit Pistons",
+      "event_start": "2026-10-20T19:00:00.000000Z",
+      "competition": "NBA",
+      "grouping_name": "Moneyline",
+      "position": "Detroit Pistons",
+      "title": "NBA BOS @ DET",
+      "max_price": "1.0000",
+      "market_id": "d577b964-08a3-4872-bb98-64ff6a114bc2",
+      "group_title": "Pistons"
+    },
+    "bae1c62f-1442-4e26-9add-55099b7111d7": {
+      "event_id": "b965893a-29f0-4809-bb0f-de5736c101cc",
+      "event_title": "Philadelphia 76ers at New York Knicks",
+      "event_start": "2026-10-20T23:00:00.000000Z",
+      "competition": "NBA",
+      "grouping_name": "Moneyline",
+      "position": "Philadelphia 76ers",
+      "title": "NBA PHI @ NY",
+      "max_price": "1.0000",
+      "market_id": "bae1c62f-1442-4e26-9add-55099b7111d7",
+      "group_title": "76ers"
+    },
+    "649ebe4f-2844-422b-9d00-60ffe663408e": {
+      "event_id": "b965893a-29f0-4809-bb0f-de5736c101cc",
+      "event_title": "Philadelphia 76ers at New York Knicks",
+      "event_start": "2026-10-20T23:00:00.000000Z",
+      "competition": "NBA",
+      "grouping_name": "Moneyline",
+      "position": "New York Knicks",
+      "title": "NBA PHI @ NY",
+      "max_price": "1.0000",
+      "market_id": "649ebe4f-2844-422b-9d00-60ffe663408e",
+      "group_title": "Knicks"
+    },
+    "abea8874-21f4-4fe2-9a61-5f564851165c": {
+      "event_id": "eca0fa27-f192-49c6-9d8c-0035c1c03e39",
+      "event_title": "Oklahoma City Thunder at San Antonio Spurs",
+      "event_start": "2026-10-21T01:30:00.000000Z",
+      "competition": "NBA",
+      "grouping_name": "Moneyline",
+      "position": "Oklahoma City Thunder",
+      "title": "NBA OKC @ SA",
+      "max_price": "1.0000",
+      "market_id": "abea8874-21f4-4fe2-9a61-5f564851165c",
+      "group_title": "Thunder"
+    },
+    "3fee0723-b28b-43a2-9433-0fbd08dad64c": {
+      "event_id": "eca0fa27-f192-49c6-9d8c-0035c1c03e39",
+      "event_title": "Oklahoma City Thunder at San Antonio Spurs",
+      "event_start": "2026-10-21T01:30:00.000000Z",
+      "competition": "NBA",
+      "grouping_name": "Moneyline",
+      "position": "San Antonio Spurs",
+      "title": "NBA OKC @ SA",
+      "max_price": "1.0000",
+      "market_id": "3fee0723-b28b-43a2-9433-0fbd08dad64c",
+      "group_title": "Spurs"
+    },
+    "f3fae74b-f6e7-4af3-929b-4bac11f9411b": {
+      "event_id": "7e13f449-4380-4b07-9ce0-c54f03ea7fcc",
+      "event_title": "Milwaukee Bucks at Washington Wizards",
+      "event_start": "2026-10-21T23:00:00.000000Z",
+      "competition": "NBA",
+      "grouping_name": "Moneyline",
+      "position": "Washington Wizards",
+      "title": "NBA MIL @ WSH",
+      "max_price": "1.0000",
+      "market_id": "f3fae74b-f6e7-4af3-929b-4bac11f9411b",
+      "group_title": "Wizards"
+    },
+    "4fc01cbe-8c84-4924-8b8c-434e66fd6122": {
+      "event_id": "77019fcd-1dac-4450-b315-051fc9f850b7",
+      "event_title": "Atlanta Hawks at Orlando Magic",
+      "event_start": "2026-10-21T23:00:00.000000Z",
+      "competition": "NBA",
+      "grouping_name": "Moneyline",
+      "position": "Orlando Magic",
+      "title": "NBA ATL @ ORL",
+      "max_price": "1.0000",
+      "market_id": "4fc01cbe-8c84-4924-8b8c-434e66fd6122",
+      "group_title": "Magic"
+    },
+    "2e32e556-e8f6-4aa1-aaed-7a7f658b3dbb": {
+      "event_id": "77019fcd-1dac-4450-b315-051fc9f850b7",
+      "event_title": "Atlanta Hawks at Orlando Magic",
+      "event_start": "2026-10-21T23:00:00.000000Z",
+      "competition": "NBA",
+      "grouping_name": "Moneyline",
+      "position": "Atlanta Hawks",
+      "title": "NBA ATL @ ORL",
+      "max_price": "1.0000",
+      "market_id": "2e32e556-e8f6-4aa1-aaed-7a7f658b3dbb",
+      "group_title": "Hawks"
+    },
+    "8485ea13-7216-420d-8f68-afcc11639679": {
+      "event_id": "7e13f449-4380-4b07-9ce0-c54f03ea7fcc",
+      "event_title": "Milwaukee Bucks at Washington Wizards",
+      "event_start": "2026-10-21T23:00:00.000000Z",
+      "competition": "NBA",
+      "grouping_name": "Moneyline",
+      "position": "Milwaukee Bucks",
+      "title": "NBA MIL @ WSH",
+      "max_price": "1.0000",
+      "market_id": "8485ea13-7216-420d-8f68-afcc11639679",
+      "group_title": "Bucks"
+    },
+    "0b0334ec-5c14-4556-9e6c-f17938af31b6": {
+      "event_id": "e32ffa68-7950-41ad-bacc-31ab8cb087d6",
+      "event_title": "Minnesota Timberwolves at Miami Heat",
+      "event_start": "2026-10-21T23:30:00.000000Z",
+      "competition": "NBA",
+      "grouping_name": "Moneyline",
+      "position": "Miami Heat",
+      "title": "NBA MIN @ MIA",
+      "max_price": "1.0000",
+      "market_id": "0b0334ec-5c14-4556-9e6c-f17938af31b6",
+      "group_title": "Heat"
+    },
+    "2aa01543-c35b-48f9-94f5-545c5f66cf86": {
+      "event_id": "e32ffa68-7950-41ad-bacc-31ab8cb087d6",
+      "event_title": "Minnesota Timberwolves at Miami Heat",
+      "event_start": "2026-10-21T23:30:00.000000Z",
+      "competition": "NBA",
+      "grouping_name": "Moneyline",
+      "position": "Minnesota Timberwolves",
+      "title": "NBA MIN @ MIA",
+      "max_price": "1.0000",
+      "market_id": "2aa01543-c35b-48f9-94f5-545c5f66cf86",
+      "group_title": "Timberwolves"
+    },
+    "7094abfb-fa00-4fa5-8442-f525f543b0ab": {
+      "event_id": "ddd0b54d-ca53-4b14-b563-d0d4df716004",
+      "event_title": "Charlotte Hornets at Brooklyn Nets",
+      "event_start": "2026-10-21T23:30:00.000000Z",
+      "competition": "NBA",
+      "grouping_name": "Moneyline",
+      "position": "Brooklyn Nets",
+      "title": "NBA CHA @ BKN",
+      "max_price": "1.0000",
+      "market_id": "7094abfb-fa00-4fa5-8442-f525f543b0ab",
+      "group_title": "Nets"
+    },
+    "889904ef-2c6d-4e4d-8efd-9ad344042bda": {
+      "event_id": "ddd0b54d-ca53-4b14-b563-d0d4df716004",
+      "event_title": "Charlotte Hornets at Brooklyn Nets",
+      "event_start": "2026-10-21T23:30:00.000000Z",
+      "competition": "NBA",
+      "grouping_name": "Moneyline",
+      "position": "Charlotte Hornets",
+      "title": "NBA CHA @ BKN",
+      "max_price": "1.0000",
+      "market_id": "889904ef-2c6d-4e4d-8efd-9ad344042bda",
+      "group_title": "Hornets"
+    },
+    "ca7969cc-c1eb-4e95-b1aa-d9be35c58904": {
+      "event_id": "0f1ac517-2ec5-4cff-bd2e-eaf500e10e35",
+      "event_title": "Chicago Bulls at Toronto Raptors",
+      "event_start": "2026-10-21T23:30:00.000000Z",
+      "competition": "NBA",
+      "grouping_name": "Moneyline",
+      "position": "Toronto Raptors",
+      "title": "NBA CHI @ TOR",
+      "max_price": "1.0000",
+      "market_id": "ca7969cc-c1eb-4e95-b1aa-d9be35c58904",
+      "group_title": "Raptors"
+    },
+    "2837e834-f13c-4acf-a6f5-e7cc2bf97232": {
+      "event_id": "0f1ac517-2ec5-4cff-bd2e-eaf500e10e35",
+      "event_title": "Chicago Bulls at Toronto Raptors",
+      "event_start": "2026-10-21T23:30:00.000000Z",
+      "competition": "NBA",
+      "grouping_name": "Moneyline",
+      "position": "Chicago Bulls",
+      "title": "NBA CHI @ TOR",
+      "max_price": "1.0000",
+      "market_id": "2837e834-f13c-4acf-a6f5-e7cc2bf97232",
+      "group_title": "Bulls"
+    },
+    "c7bc77ee-105a-4311-aaaa-fe3fe4103583": {
+      "event_id": "0ec9c971-f25f-4df3-acb9-b0f96f708f07",
+      "event_title": "Utah Jazz at Memphis Grizzlies",
+      "event_start": "2026-10-22T00:00:00.000000Z",
+      "competition": "NBA",
+      "grouping_name": "Moneyline",
+      "position": "Memphis Grizzlies",
+      "title": "NBA UTAH @ MEM",
+      "max_price": "1.0000",
+      "market_id": "c7bc77ee-105a-4311-aaaa-fe3fe4103583",
+      "group_title": "Grizzlies"
+    },
+    "16778b03-aaf6-4fa1-8f97-d6c2b1a5436c": {
+      "event_id": "0ec9c971-f25f-4df3-acb9-b0f96f708f07",
+      "event_title": "Utah Jazz at Memphis Grizzlies",
+      "event_start": "2026-10-22T00:00:00.000000Z",
+      "competition": "NBA",
+      "grouping_name": "Moneyline",
+      "position": "Utah Jazz",
+      "title": "NBA UTAH @ MEM",
+      "max_price": "1.0000",
+      "market_id": "16778b03-aaf6-4fa1-8f97-d6c2b1a5436c",
+      "group_title": "Jazz"
+    },
+    "a69c3420-a9a7-426f-9a61-23ef4f3d3d9b": {
+      "event_id": "13160bc6-3671-438b-8294-5b276bf41f36",
+      "event_title": "Indiana Pacers at New Orleans Pelicans",
+      "event_start": "2026-10-22T00:00:00.000000Z",
+      "competition": "NBA",
+      "grouping_name": "Moneyline",
+      "position": "New Orleans Pelicans",
+      "title": "NBA IND @ NO",
+      "max_price": "1.0000",
+      "market_id": "a69c3420-a9a7-426f-9a61-23ef4f3d3d9b",
+      "group_title": "Pelicans"
+    },
+    "1f1ee9f6-1a93-463f-bb71-4b254889b3b8": {
+      "event_id": "13160bc6-3671-438b-8294-5b276bf41f36",
+      "event_title": "Indiana Pacers at New Orleans Pelicans",
+      "event_start": "2026-10-22T00:00:00.000000Z",
+      "competition": "NBA",
+      "grouping_name": "Moneyline",
+      "position": "Indiana Pacers",
+      "title": "NBA IND @ NO",
+      "max_price": "1.0000",
+      "market_id": "1f1ee9f6-1a93-463f-bb71-4b254889b3b8",
+      "group_title": "Pacers"
+    },
+    "b87aa7f7-e1cb-4ad4-8af9-1f2795471bd1": {
+      "event_id": "d1bbe443-2dd8-43b8-9c55-50a55a939bd9",
+      "event_title": "Dallas Mavericks at Houston Rockets",
+      "event_start": "2026-10-22T00:30:00.000000Z",
+      "competition": "NBA",
+      "grouping_name": "Moneyline",
+      "position": "Houston Rockets",
+      "title": "NBA DAL @ HOU",
+      "max_price": "1.0000",
+      "market_id": "b87aa7f7-e1cb-4ad4-8af9-1f2795471bd1",
+      "group_title": "Rockets"
+    },
+    "8232fb7d-e299-4199-aec0-beecb4aa8a63": {
+      "event_id": "d1bbe443-2dd8-43b8-9c55-50a55a939bd9",
+      "event_title": "Dallas Mavericks at Houston Rockets",
+      "event_start": "2026-10-22T00:30:00.000000Z",
+      "competition": "NBA",
+      "grouping_name": "Moneyline",
+      "position": "Dallas Mavericks",
+      "title": "NBA DAL @ HOU",
+      "max_price": "1.0000",
+      "market_id": "8232fb7d-e299-4199-aec0-beecb4aa8a63",
+      "group_title": "Mavericks"
+    },
+    "e6d8325f-41aa-4e32-8238-8d1b9e18b328": {
+      "event_id": "991ba304-7331-401c-9121-81257e6d1341",
+      "event_title": "Golden State Warriors at Los Angeles Lakers",
+      "event_start": "2026-10-22T02:00:00.000000Z",
+      "competition": "NBA",
+      "grouping_name": "Moneyline",
+      "position": "Los Angeles Lakers",
+      "title": "NBA GS @ LAL",
+      "max_price": "1.0000",
+      "market_id": "e6d8325f-41aa-4e32-8238-8d1b9e18b328",
+      "group_title": "Lakers"
+    },
+    "d3530c80-1732-4f37-8bc5-9a0580d4d54a": {
+      "event_id": "991ba304-7331-401c-9121-81257e6d1341",
+      "event_title": "Golden State Warriors at Los Angeles Lakers",
+      "event_start": "2026-10-22T02:00:00.000000Z",
+      "competition": "NBA",
+      "grouping_name": "Moneyline",
+      "position": "Golden State Warriors",
+      "title": "NBA GS @ LAL",
+      "max_price": "1.0000",
+      "market_id": "d3530c80-1732-4f37-8bc5-9a0580d4d54a",
+      "group_title": "Warriors"
+    },
+    "577a8dd1-e6e1-41bc-85fb-581f74d608c8": {
+      "event_id": "37d3c5a8-5092-4b24-ada8-4afb557bc81e",
+      "event_title": "Phoenix Suns at Portland Trail Blazers",
+      "event_start": "2026-10-22T02:00:00.000000Z",
+      "competition": "NBA",
+      "grouping_name": "Moneyline",
+      "position": "Portland Trail Blazers",
+      "title": "NBA PHX @ POR",
+      "max_price": "1.0000",
+      "market_id": "577a8dd1-e6e1-41bc-85fb-581f74d608c8",
+      "group_title": "Trail Blazers"
+    },
+    "a5a56c45-993e-4f7c-9256-1085c794ed34": {
+      "event_id": "37d3c5a8-5092-4b24-ada8-4afb557bc81e",
+      "event_title": "Phoenix Suns at Portland Trail Blazers",
+      "event_start": "2026-10-22T02:00:00.000000Z",
+      "competition": "NBA",
+      "grouping_name": "Moneyline",
+      "position": "Phoenix Suns",
+      "title": "NBA PHX @ POR",
+      "max_price": "1.0000",
+      "market_id": "a5a56c45-993e-4f7c-9256-1085c794ed34",
+      "group_title": "Suns"
+    },
+    "54fff386-db54-4bed-974f-13b37ec2c06f": {
+      "event_id": "af7a1a7e-4864-40b4-b6a2-34154a3a8638",
+      "event_title": "Sacramento Kings at LA Clippers",
+      "event_start": "2026-10-22T02:30:00.000000Z",
+      "competition": "NBA",
+      "grouping_name": "Moneyline",
+      "position": "LA Clippers",
+      "title": "NBA SAC @ LAC",
+      "max_price": "1.0000",
+      "market_id": "54fff386-db54-4bed-974f-13b37ec2c06f",
+      "group_title": "Clippers"
+    },
+    "6879f972-dd17-4351-9836-33f0e0c7f45c": {
+      "event_id": "af7a1a7e-4864-40b4-b6a2-34154a3a8638",
+      "event_title": "Sacramento Kings at LA Clippers",
+      "event_start": "2026-10-22T02:30:00.000000Z",
+      "competition": "NBA",
+      "grouping_name": "Moneyline",
+      "position": "Sacramento Kings",
+      "title": "NBA SAC @ LAC",
+      "max_price": "1.0000",
+      "market_id": "6879f972-dd17-4351-9836-33f0e0c7f45c",
+      "group_title": "Kings"
+    }
+  },
+  "orderbooks": {
+    "50a23523-b5ae-4060-a6da-7c6686559a44": {
+      "b": [
+        {
+          "tl": 222.07,
+          "q": 419.0,
+          "p": 0.53,
+          "tc": 419.0,
+          "l": 222.07
+        },
+        {
+          "tl": 711.91,
+          "q": 942.0,
+          "p": 0.52,
+          "tc": 1361.0,
+          "l": 489.84
+        },
+        {
+          "tl": 2557.6,
+          "q": 3619.0,
+          "p": 0.51,
+          "tc": 4980.0,
+          "l": 1845.69
+        },
+        {
+          "tl": 2700.1,
+          "q": 285.0,
+          "p": 0.5,
+          "tc": 5265.0,
+          "l": 142.5
+        }
+      ],
+      "o": [
+        {
+          "tl": 1635.7,
+          "q": 2974.0,
+          "p": 0.55,
+          "tc": 2974.0,
+          "l": 1635.7
+        },
+        {
+          "tl": 1903.03,
+          "q": 469.0,
+          "p": 0.57,
+          "tc": 3443.0,
+          "l": 267.33
+        },
+        {
+          "tl": 2137.35,
+          "q": 404.0,
+          "p": 0.58,
+          "tc": 3847.0,
+          "l": 234.32
+        },
+        {
+          "tl": 2725.58,
+          "q": 997.0,
+          "p": 0.59,
+          "tc": 4844.0,
+          "l": 588.23
+        },
+        {
+          "tl": 3051.98,
+          "q": 544.0,
+          "p": 0.6,
+          "tc": 5388.0,
+          "l": 326.4
+        },
+        {
+          "tl": 3234.98,
+          "q": 300.0,
+          "p": 0.61,
+          "tc": 5688.0,
+          "l": 183.0
+        }
+      ]
+    },
+    "8c829a72-5063-411c-bf27-fcc88e53b2f6": {
+      "b": [
+        {
+          "tl": 180.6,
+          "q": 420.0,
+          "p": 0.43,
+          "tc": 420.0,
+          "l": 180.6
+        },
+        {
+          "tl": 368.34,
+          "q": 447.0,
+          "p": 0.42,
+          "tc": 867.0,
+          "l": 187.74
+        },
+        {
+          "tl": 786.54,
+          "q": 1020.0,
+          "p": 0.41,
+          "tc": 1887.0,
+          "l": 418.2
+        },
+        {
+          "tl": 1000.54,
+          "q": 535.0,
+          "p": 0.4,
+          "tc": 2422.0,
+          "l": 214.0
+        },
+        {
+          "tl": 1104.67,
+          "q": 267.0,
+          "p": 0.39,
+          "tc": 2689.0,
+          "l": 104.13
+        }
+      ],
+      "o": [
+        {
+          "tl": 191.76,
+          "q": 408.0,
+          "p": 0.47,
+          "tc": 408.0,
+          "l": 191.76
+        },
+        {
+          "tl": 652.08,
+          "q": 959.0,
+          "p": 0.48,
+          "tc": 1367.0,
+          "l": 460.32
+        },
+        {
+          "tl": 1096.51,
+          "q": 907.0,
+          "p": 0.49,
+          "tc": 2274.0,
+          "l": 444.43
+        },
+        {
+          "tl": 1220.51,
+          "q": 248.0,
+          "p": 0.5,
+          "tc": 2522.0,
+          "l": 124.0
+        }
+      ]
+    },
+    "1c927594-fdc4-43c5-a59f-b7d8e8d32fd4": {
+      "b": [
+        {
+          "tl": 148.32,
+          "q": 309.0,
+          "p": 0.48,
+          "tc": 309.0,
+          "l": 148.32
+        },
+        {
+          "tl": 279.45,
+          "q": 279.0,
+          "p": 0.47,
+          "tc": 588.0,
+          "l": 131.13
+        },
+        {
+          "tl": 353.05,
+          "q": 160.0,
+          "p": 0.46,
+          "tc": 748.0,
+          "l": 73.6
+        }
+      ],
+      "o": [
+        {
+          "tl": 156.35,
+          "q": 295.0,
+          "p": 0.53,
+          "tc": 295.0,
+          "l": 156.35
+        },
+        {
+          "tl": 316.19,
+          "q": 296.0,
+          "p": 0.54,
+          "tc": 591.0,
+          "l": 159.84
+        },
+        {
+          "tl": 406.94,
+          "q": 165.0,
+          "p": 0.55,
+          "tc": 756.0,
+          "l": 90.75
+        }
+      ]
+    },
+    "d577b964-08a3-4872-bb98-64ff6a114bc2": {
+      "b": [
+        {
+          "tl": 1379.52,
+          "q": 2874.0,
+          "p": 0.48,
+          "tc": 2874.0,
+          "l": 1379.52
+        },
+        {
+          "tl": 1532.27,
+          "q": 325.0,
+          "p": 0.47,
+          "tc": 3199.0,
+          "l": 152.75
+        },
+        {
+          "tl": 1674.87,
+          "q": 310.0,
+          "p": 0.46,
+          "tc": 3509.0,
+          "l": 142.6
+        },
+        {
+          "tl": 1738.32,
+          "q": 141.0,
+          "p": 0.45,
+          "tc": 3650.0,
+          "l": 63.45
+        }
+      ],
+      "o": [
+        {
+          "tl": 1641.64,
+          "q": 3157.0,
+          "p": 0.52,
+          "tc": 3157.0,
+          "l": 1641.64
+        },
+        {
+          "tl": 1809.12,
+          "q": 316.0,
+          "p": 0.53,
+          "tc": 3473.0,
+          "l": 167.48
+        },
+        {
+          "tl": 1890.66,
+          "q": 151.0,
+          "p": 0.54,
+          "tc": 3624.0,
+          "l": 81.54
+        }
+      ]
+    },
+    "bae1c62f-1442-4e26-9add-55099b7111d7": {
+      "b": [
+        {
+          "tl": 139.65,
+          "q": 399.0,
+          "p": 0.35,
+          "tc": 399.0,
+          "l": 139.65
+        },
+        {
+          "tl": 283.81,
+          "q": 424.0,
+          "p": 0.34,
+          "tc": 823.0,
+          "l": 144.16
+        },
+        {
+          "tl": 349.48,
+          "q": 199.0,
+          "p": 0.33,
+          "tc": 1022.0,
+          "l": 65.67
+        }
+      ],
+      "o": [
+        {
+          "tl": 149.65,
+          "q": 365.0,
+          "p": 0.41,
+          "tc": 365.0,
+          "l": 149.65
+        },
+        {
+          "tl": 313.45,
+          "q": 390.0,
+          "p": 0.42,
+          "tc": 755.0,
+          "l": 163.8
+        },
+        {
+          "tl": 396.01,
+          "q": 192.0,
+          "p": 0.43,
+          "tc": 947.0,
+          "l": 82.56
+        }
+      ]
+    },
+    "649ebe4f-2844-422b-9d00-60ffe663408e": {
+      "b": [
+        {
+          "tl": 1381.2,
+          "q": 2302.0,
+          "p": 0.6,
+          "tc": 2302.0,
+          "l": 1381.2
+        },
+        {
+          "tl": 1618.97,
+          "q": 403.0,
+          "p": 0.59,
+          "tc": 2705.0,
+          "l": 237.77
+        },
+        {
+          "tl": 1837.05,
+          "q": 376.0,
+          "p": 0.58,
+          "tc": 3081.0,
+          "l": 218.08
+        },
+        {
+          "tl": 1941.93,
+          "q": 184.0,
+          "p": 0.57,
+          "tc": 3265.0,
+          "l": 104.88
+        }
+      ],
+      "o": [
+        {
+          "tl": 2490.24,
+          "q": 3891.0,
+          "p": 0.64,
+          "tc": 3891.0,
+          "l": 2490.24
+        },
+        {
+          "tl": 2772.34,
+          "q": 434.0,
+          "p": 0.65,
+          "tc": 4325.0,
+          "l": 282.1
+        },
+        {
+          "tl": 3052.84,
+          "q": 425.0,
+          "p": 0.66,
+          "tc": 4750.0,
+          "l": 280.5
+        },
+        {
+          "tl": 3187.51,
+          "q": 201.0,
+          "p": 0.67,
+          "tc": 4951.0,
+          "l": 134.67
+        }
+      ]
+    },
+    "abea8874-21f4-4fe2-9a61-5f564851165c": {
+      "b": [
+        {
+          "tl": 145.55,
+          "q": 355.0,
+          "p": 0.41,
+          "tc": 355.0,
+          "l": 145.55
+        },
+        {
+          "tl": 273.55,
+          "q": 320.0,
+          "p": 0.4,
+          "tc": 675.0,
+          "l": 128.0
+        },
+        {
+          "tl": 344.92,
+          "q": 183.0,
+          "p": 0.39,
+          "tc": 858.0,
+          "l": 71.37
+        }
+      ],
+      "o": [
+        {
+          "tl": 146.64,
+          "q": 312.0,
+          "p": 0.47,
+          "tc": 312.0,
+          "l": 146.64
+        },
+        {
+          "tl": 313.68,
+          "q": 348.0,
+          "p": 0.48,
+          "tc": 660.0,
+          "l": 167.04
+        },
+        {
+          "tl": 386.69,
+          "q": 149.0,
+          "p": 0.49,
+          "tc": 809.0,
+          "l": 73.01
+        }
+      ]
+    },
+    "3fee0723-b28b-43a2-9433-0fbd08dad64c": {
+      "b": [
+        {
+          "tl": 1569.33,
+          "q": 2961.0,
+          "p": 0.53,
+          "tc": 2961.0,
+          "l": 1569.33
+        },
+        {
+          "tl": 1738.85,
+          "q": 326.0,
+          "p": 0.52,
+          "tc": 3287.0,
+          "l": 169.52
+        },
+        {
+          "tl": 1814.33,
+          "q": 148.0,
+          "p": 0.51,
+          "tc": 3435.0,
+          "l": 75.48
+        }
+      ],
+      "o": [
+        {
+          "tl": 1794.93,
+          "q": 3149.0,
+          "p": 0.57,
+          "tc": 3149.0,
+          "l": 1794.93
+        },
+        {
+          "tl": 2000.25,
+          "q": 348.0,
+          "p": 0.59,
+          "tc": 3497.0,
+          "l": 205.32
+        },
+        {
+          "tl": 2217.45,
+          "q": 362.0,
+          "p": 0.6,
+          "tc": 3859.0,
+          "l": 217.2
+        },
+        {
+          "tl": 2323.59,
+          "q": 174.0,
+          "p": 0.61,
+          "tc": 4033.0,
+          "l": 106.14
+        }
+      ]
+    },
+    "f3fae74b-f6e7-4af3-929b-4bac11f9411b": {
+      "b": [],
+      "o": []
+    },
+    "4fc01cbe-8c84-4924-8b8c-434e66fd6122": {
+      "b": [],
+      "o": []
+    },
+    "2e32e556-e8f6-4aa1-aaed-7a7f658b3dbb": {
+      "b": [],
+      "o": []
+    },
+    "8485ea13-7216-420d-8f68-afcc11639679": {
+      "b": [],
+      "o": []
+    },
+    "0b0334ec-5c14-4556-9e6c-f17938af31b6": {
+      "b": [],
+      "o": []
+    },
+    "2aa01543-c35b-48f9-94f5-545c5f66cf86": {
+      "b": [],
+      "o": []
+    },
+    "7094abfb-fa00-4fa5-8442-f525f543b0ab": {
+      "b": [],
+      "o": []
+    },
+    "889904ef-2c6d-4e4d-8efd-9ad344042bda": {
+      "b": [],
+      "o": []
+    },
+    "ca7969cc-c1eb-4e95-b1aa-d9be35c58904": {
+      "b": [],
+      "o": []
+    },
+    "2837e834-f13c-4acf-a6f5-e7cc2bf97232": {
+      "b": [],
+      "o": []
+    },
+    "c7bc77ee-105a-4311-aaaa-fe3fe4103583": {
+      "b": [],
+      "o": []
+    },
+    "16778b03-aaf6-4fa1-8f97-d6c2b1a5436c": {
+      "b": [],
+      "o": []
+    },
+    "a69c3420-a9a7-426f-9a61-23ef4f3d3d9b": {
+      "b": [],
+      "o": []
+    },
+    "1f1ee9f6-1a93-463f-bb71-4b254889b3b8": {
+      "b": [],
+      "o": []
+    },
+    "b87aa7f7-e1cb-4ad4-8af9-1f2795471bd1": {
+      "b": [],
+      "o": []
+    },
+    "8232fb7d-e299-4199-aec0-beecb4aa8a63": {
+      "b": [],
+      "o": []
+    },
+    "e6d8325f-41aa-4e32-8238-8d1b9e18b328": {
+      "b": [],
+      "o": []
+    },
+    "d3530c80-1732-4f37-8bc5-9a0580d4d54a": {
+      "b": [],
+      "o": []
+    },
+    "577a8dd1-e6e1-41bc-85fb-581f74d608c8": {
+      "b": [],
+      "o": []
+    },
+    "a5a56c45-993e-4f7c-9256-1085c794ed34": {
+      "b": [],
+      "o": []
+    },
+    "54fff386-db54-4bed-974f-13b37ec2c06f": {
+      "b": [],
+      "o": []
+    },
+    "6879f972-dd17-4351-9836-33f0e0c7f45c": {
+      "b": [],
+      "o": []
+    }
+  }
+}

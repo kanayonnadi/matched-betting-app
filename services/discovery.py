@@ -142,6 +142,7 @@ def _discover(promotion, mode, stake, kind, book=None, exchange=None, routes=Non
                     routes,
                     float(stake),
                     kind=kind,
+                    enrich_order_books=True,
                 )
             )
         except (ProviderUnavailableError, LiveDataUnavailable) as exc:

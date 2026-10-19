@@ -112,6 +112,31 @@ def opportunities_for_event(
                 order_book.timestamp if order_book is not None and order_book.timestamp
                 else exchange_quote.timestamp
             )
+            exchange_received_at = (
+                getattr(order_book, "received_at", None)
+                if order_book is not None
+                else getattr(exchange_quote, "received_at", None)
+            )
+            exchange_source_timestamp = (
+                getattr(order_book, "source_timestamp", None)
+                if order_book is not None
+                else getattr(exchange_quote, "source_timestamp", None)
+            )
+            exchange_completeness = (
+                getattr(order_book, "completeness", None)
+                if order_book is not None
+                else None
+            )
+            exchange_timestamp_source = (
+                getattr(order_book, "timestamp_source", None)
+                if order_book is not None
+                else getattr(exchange_quote, "timestamp_source", None)
+            )
+            exchange_freshness_verified = (
+                getattr(order_book, "freshness_verified", None)
+                if order_book is not None
+                else getattr(exchange_quote, "freshness_verified", None)
+            )
             liquidity_snapshot_id = (
                 f"{exchange_quote.provider}:{market_name}:{exchange_timestamp.isoformat()}"
                 if order_book is not None and exchange_timestamp
@@ -128,6 +153,11 @@ def opportunities_for_event(
                 ),
                 sportsbook_quote_timestamp=book_timestamp,
                 exchange_book_timestamp=exchange_timestamp,
+                exchange_book_received_at=exchange_received_at,
+                exchange_book_source_timestamp=exchange_source_timestamp,
+                exchange_book_completeness=exchange_completeness,
+                exchange_timestamp_source=exchange_timestamp_source,
+                exchange_freshness_verified=exchange_freshness_verified,
                 retrieved_at=retrieved_at,
                 event_match_confidence=event_match.confidence,
                 market_match_confidence=market_match.confidence,

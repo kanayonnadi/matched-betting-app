@@ -216,11 +216,17 @@ def _opportunity_stale(opportunity, exchange_max_age=30, book_max_age=300) -> bo
     provenance = getattr(opportunity, "provenance", None)
     now = datetime.now(timezone.utc)
     if provenance is not None:
+        # Unknown/unverified freshness can never be treated as executable.
+        if getattr(provenance, "exchange_freshness_verified", None) is False:
+            return True
+        completeness = getattr(provenance, "exchange_book_completeness", None)
+        if completeness is not None and completeness != "COMPLETE":
+            return True
         exchange_ts = getattr(provenance, "exchange_book_timestamp", None)
         book_ts = getattr(provenance, "sportsbook_quote_timestamp", None)
-        if exchange_ts is None and book_ts is None:
-            return is_stale(opportunity.timestamp)
-        if exchange_ts is not None and (now - exchange_ts).total_seconds() > exchange_max_age:
+        if exchange_ts is None:
+            return True
+        if (now - exchange_ts).total_seconds() > exchange_max_age:
             return True
         if book_ts is not None and (now - book_ts).total_seconds() > book_max_age:
             return True

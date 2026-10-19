@@ -1,0 +1,200 @@
+{
+  "captured_at": "2026-10-19T18:53:54.196059+00:00",
+  "snapshot_dir": "data/snapshots/20261019T185354Z",
+  "stx": {
+    "Basketball": {
+      "pages": 2,
+      "markets": 369
+    },
+    "Hockey": {
+      "pages": 5,
+      "markets": 870
+    },
+    "Baseball": {
+      "pages": 1,
+      "markets": 53
+    },
+    "Football": {
+      "pages": 6,
+      "markets": 1091
+    },
+    "Soccer": {
+      "pages": 1,
+      "markets": 110
+    }
+  },
+  "theoddsapi": {
+    "icehockey_nhl__playnow_ca": {
+      "status": 200,
+      "events": 15,
+      "requests_remaining": "253"
+    },
+    "icehockey_nhl__betmgm_ca_on": {
+      "status": 200,
+      "events": 15,
+      "requests_remaining": "252"
+    },
+    "icehockey_nhl__sportsinteraction_ca_on": {
+      "status": 200,
+      "events": 15,
+      "requests_remaining": "251"
+    },
+    "icehockey_nhl__betano_ca_on": {
+      "status": 200,
+      "events": 15,
+      "requests_remaining": "250"
+    },
+    "icehockey_nhl__pointsbetca": {
+      "status": 200,
+      "events": 15,
+      "requests_remaining": "249"
+    },
+    "icehockey_nhl__proline_ca_on": {
+      "status": 200,
+      "events": 15,
+      "requests_remaining": "248"
+    },
+    "basketball_nba__playnow_ca": {
+      "status": 200,
+      "events": 46,
+      "requests_remaining": "247"
+    },
+    "basketball_nba__betmgm_ca_on": {
+      "status": 200,
+      "events": 46,
+      "requests_remaining": "246"
+    },
+    "basketball_nba__sportsinteraction_ca_on": {
+      "status": 200,
+      "events": 46,
+      "requests_remaining": "245"
+    },
+    "basketball_nba__betano_ca_on": {
+      "status": 200,
+      "events": 46,
+      "requests_remaining": "244"
+    },
+    "basketball_nba__pointsbetca": {
+      "status": 200,
+      "events": 46,
+      "requests_remaining": "243"
+    },
+    "basketball_nba__proline_ca_on": {
+      "status": 200,
+      "events": 46,
+      "requests_remaining": "242"
+    },
+    "baseball_mlb__playnow_ca": {
+      "status": 200,
+      "events": 1,
+      "requests_remaining": "241"
+    },
+    "baseball_mlb__betmgm_ca_on": {
+      "status": 200,
+      "events": 1,
+      "requests_remaining": "240"
+    },
+    "baseball_mlb__sportsinteraction_ca_on": {
+      "status": 200,
+      "events": 1,
+      "requests_remaining": "239"
+    },
+    "baseball_mlb__betano_ca_on": {
+      "status": 200,
+      "events": 1,
+      "requests_remaining": "238"
+    },
+    "baseball_mlb__pointsbetca": {
+      "status": 200,
+      "events": 1,
+      "requests_remaining": "237"
+    },
+    "baseball_mlb__proline_ca_on": {
+      "status": 200,
+      "events": 1,
+      "requests_remaining": "236"
+    },
+    "americanfootball_nfl__playnow_ca": {
+      "status": 200,
+      "events": 15,
+      "requests_remaining": "235"
+    },
+    "americanfootball_nfl__betmgm_ca_on": {
+      "status": 200,
+      "events": 15,
+      "requests_remaining": "234"
+    },
+    "americanfootball_nfl__sportsinteraction_ca_on": {
+      "status": 200,
+      "events": 15,
+      "requests_remaining": "233"
+    },
+    "americanfootball_nfl__betano_ca_on": {
+      "status": 200,
+      "events": 15,
+      "requests_remaining": "232"
+    },
+    "americanfootball_nfl__pointsbetca": {
+      "status": 200,
+      "events": 15,
+      "requests_remaining": "231"
+    },
+    "americanfootball_nfl__proline_ca_on": {
+      "status": 200,
+      "events": 15,
+      "requests_remaining": "230"
+    },
+    "soccer_epl__playnow_ca": {
+      "status": 200,
+      "events": 21,
+      "requests_remaining": "229"
+    },
+    "soccer_epl__betmgm_ca_on": {
+      "status": 200,
+      "events": 21,
+      "requests_remaining": "228"
+    },
+    "soccer_epl__sportsinteraction_ca_on": {
+      "status": 200,
+      "events": 21,
+      "requests_remaining": "227"
+    },
+    "soccer_epl__betano_ca_on": {
+      "status": 200,
+      "events": 21,
+      "requests_remaining": "226"
+    },
+    "soccer_epl__pointsbetca": {
+      "status": 200,
+      "events": 21,
+      "requests_remaining": "225"
+    },
+    "soccer_epl__proline_ca_on": {
+      "status": 200,
+      "events": 21,
+      "requests_remaining": "224"
+    }
+  },
+  "orderbooks": {
+    "Basketball": {
+      "requested": 30,
+      "received": 30
+    },
+    "Hockey": {
+      "requested": 30,
+      "received": 30
+    },
+    "Baseball": {
+      "requested": 4,
+      "received": 4
+    },
+    "Football": {
+      "requested": 140,
+      "received": 140
+    },
+    "Soccer": {
+      "requested": 0,
+      "received": 0
+    }
+  }
+}

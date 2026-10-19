@@ -32,6 +32,11 @@ class Provenance:
     market_match_confidence: Optional[float]
     liquidity_snapshot_id: Optional[str]
     is_live: bool
+    exchange_book_received_at: Optional[datetime] = None
+    exchange_book_source_timestamp: Optional[datetime] = None
+    exchange_book_completeness: Optional[str] = None
+    exchange_timestamp_source: Optional[str] = None
+    exchange_freshness_verified: Optional[bool] = None
 
     def as_dict(self) -> dict:
         return {
@@ -52,4 +57,11 @@ class Provenance:
             "market_match_confidence": self.market_match_confidence,
             "liquidity_snapshot_id": self.liquidity_snapshot_id,
             "is_live": self.is_live,
+            "exchange_book_received_at": self.exchange_book_received_at.isoformat()
+            if self.exchange_book_received_at else None,
+            "exchange_book_source_timestamp": self.exchange_book_source_timestamp.isoformat()
+            if self.exchange_book_source_timestamp else None,
+            "exchange_book_completeness": self.exchange_book_completeness,
+            "exchange_timestamp_source": self.exchange_timestamp_source,
+            "exchange_freshness_verified": self.exchange_freshness_verified,
         }

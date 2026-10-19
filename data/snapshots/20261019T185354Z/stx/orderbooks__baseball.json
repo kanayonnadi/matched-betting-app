@@ -1,0 +1,165 @@
+{
+  "sport": "Baseball",
+  "market_ids": [
+    "422964f5-1e6d-4c17-9b0a-e3bbe3ea8006",
+    "ba668cd4-b9db-4f92-96f0-afc397b0b85d",
+    "c1aabd3a-0d9b-4b17-9387-dbe1427c598d",
+    "01d30b34-6a47-4462-9c8c-fdd6c4384ab8"
+  ],
+  "markets": {
+    "422964f5-1e6d-4c17-9b0a-e3bbe3ea8006": {
+      "event_id": "9b1b7c53-21e3-4d65-a49f-f77d52c92a8d",
+      "event_title": "Cleveland Guardians at Tampa Bay Rays",
+      "event_start": "2026-10-20T00:00:00.000000Z",
+      "competition": "MLB",
+      "grouping_name": "Moneyline",
+      "position": "Tampa Bay Rays",
+      "title": "MLB Playoff CLE @ TB",
+      "max_price": "1.0000",
+      "market_id": "422964f5-1e6d-4c17-9b0a-e3bbe3ea8006",
+      "group_title": "Rays"
+    },
+    "ba668cd4-b9db-4f92-96f0-afc397b0b85d": {
+      "event_id": "9b1b7c53-21e3-4d65-a49f-f77d52c92a8d",
+      "event_title": "Cleveland Guardians at Tampa Bay Rays",
+      "event_start": "2026-10-20T00:00:00.000000Z",
+      "competition": "MLB",
+      "grouping_name": "Moneyline",
+      "position": "Cleveland Guardians",
+      "title": "MLB Playoff CLE @ TB",
+      "max_price": "1.0000",
+      "market_id": "ba668cd4-b9db-4f92-96f0-afc397b0b85d",
+      "group_title": "Guardians"
+    },
+    "c1aabd3a-0d9b-4b17-9387-dbe1427c598d": {
+      "event_id": "2f8dc1f7-5717-4977-ad08-5fffd716c005",
+      "event_title": "Cleveland Guardians at Tampa Bay Rays",
+      "event_start": "2026-10-21T00:00:00.000000Z",
+      "competition": "MLB",
+      "grouping_name": "Moneyline",
+      "position": "Cleveland Guardians",
+      "title": "MLB Playoff CLE @ TB",
+      "max_price": "1.0000",
+      "market_id": "c1aabd3a-0d9b-4b17-9387-dbe1427c598d",
+      "group_title": "Guardians"
+    },
+    "01d30b34-6a47-4462-9c8c-fdd6c4384ab8": {
+      "event_id": "2f8dc1f7-5717-4977-ad08-5fffd716c005",
+      "event_title": "Cleveland Guardians at Tampa Bay Rays",
+      "event_start": "2026-10-21T00:00:00.000000Z",
+      "competition": "MLB",
+      "grouping_name": "Moneyline",
+      "position": "Tampa Bay Rays",
+      "title": "MLB Playoff CLE @ TB",
+      "max_price": "1.0000",
+      "market_id": "01d30b34-6a47-4462-9c8c-fdd6c4384ab8",
+      "group_title": "Rays"
+    }
+  },
+  "orderbooks": {
+    "422964f5-1e6d-4c17-9b0a-e3bbe3ea8006": {
+      "b": [
+        {
+          "tl": 240.24,
+          "q": 429.0,
+          "p": 0.56,
+          "tc": 429.0,
+          "l": 240.24
+        },
+        {
+          "tl": 478.94,
+          "q": 434.0,
+          "p": 0.55,
+          "tc": 863.0,
+          "l": 238.7
+        },
+        {
+          "tl": 704.12,
+          "q": 417.0,
+          "p": 0.54,
+          "tc": 1280.0,
+          "l": 225.18
+        }
+      ],
+      "o": [
+        {
+          "tl": 264.6,
+          "q": 441.0,
+          "p": 0.6,
+          "tc": 441.0,
+          "l": 264.6
+        },
+        {
+          "tl": 545.81,
+          "q": 461.0,
+          "p": 0.61,
+          "tc": 902.0,
+          "l": 281.21
+        },
+        {
+          "tl": 815.51,
+          "q": 435.0,
+          "p": 0.62,
+          "tc": 1337.0,
+          "l": 269.7
+        }
+      ]
+    },
+    "ba668cd4-b9db-4f92-96f0-afc397b0b85d": {
+      "b": [
+        {
+          "tl": 164.0,
+          "q": 410.0,
+          "p": 0.4,
+          "tc": 410.0,
+          "l": 164.0
+        },
+        {
+          "tl": 319.22,
+          "q": 398.0,
+          "p": 0.39,
+          "tc": 808.0,
+          "l": 155.22
+        },
+        {
+          "tl": 472.74,
+          "q": 404.0,
+          "p": 0.38,
+          "tc": 1212.0,
+          "l": 153.52
+        }
+      ],
+      "o": [
+        {
+          "tl": 170.72,
+          "q": 388.0,
+          "p": 0.44,
+          "tc": 388.0,
+          "l": 170.72
+        },
+        {
+          "tl": 352.07,
+          "q": 403.0,
+          "p": 0.45,
+          "tc": 791.0,
+          "l": 181.35
+        },
+        {
+          "tl": 549.87,
+          "q": 430.0,
+          "p": 0.46,
+          "tc": 1221.0,
+          "l": 197.8
+        }
+      ]
+    },
+    "c1aabd3a-0d9b-4b17-9387-dbe1427c598d": {
+      "b": [],
+      "o": []
+    },
+    "01d30b34-6a47-4462-9c8c-fdd6c4384ab8": {
+      "b": [],
+      "o": []
+    }
+  }
+}

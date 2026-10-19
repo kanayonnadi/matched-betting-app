@@ -1,0 +1,997 @@
+{
+  "sport": "Hockey",
+  "market_ids": [
+    "f56c7309-ad1c-439e-80c3-47293f092d79",
+    "bb239e17-ce7e-48b7-be1e-93356670a983",
+    "a158f76f-bf41-4cdc-836d-fe72b344c0da",
+    "24d3c882-c3bc-4c71-b4f8-81ef3c9b2073",
+    "358aaf21-8ab5-4781-934b-8cab6731220f",
+    "760eae83-eaf8-45eb-93b8-d44cd60be57d",
+    "452403ec-37f9-4bd9-8756-1fd2deeb8e4f",
+    "9d4dd227-fe3b-4585-ba9a-7ca998937a32",
+    "df5e23e1-d1b5-4b10-afa9-abc0b7b88d45",
+    "e8afde81-5f95-4d8c-8a00-97931e90d12c",
+    "6ebfd8d9-e16a-4966-a548-0e6ae3a93bc4",
+    "1311b10b-71c3-4659-af0d-9f8581cfd6f1",
+    "0a374b17-e397-460c-ba8f-d118da64b73f",
+    "8beca9c9-0c25-4865-8f6b-e673dc021383",
+    "add043ca-c254-4234-a7bd-769757bde0d7",
+    "a469c822-9228-4e2d-998f-d47adc6db796",
+    "1617bcc7-1cab-4582-83d4-d44eba961ae2",
+    "0fa1dfbd-b111-4b99-b7a5-b289874d304d",
+    "48b729d5-a6b1-4bb8-ab16-ac3f9673a193",
+    "6799816f-f68b-4562-bfc0-3f8347babef0",
+    "8094c488-c248-4ba6-9110-de9647f8b270",
+    "42cee60b-c005-4dc8-b66a-751cdbc9ec22",
+    "79adf77a-1d19-4896-a9e5-42d88d572146",
+    "7bcd13e1-49f3-4c35-b4f0-2c835627109a",
+    "b8583f23-fb4b-43fc-b3fc-7fdc8dc9ad73",
+    "cdd618e4-408f-4050-99be-985048b3c434",
+    "0ce52405-97a9-45c3-a6ba-68067d8a8c3c",
+    "8f68eb3c-21e6-40c3-8735-2bf4f4f10935",
+    "ff420b7b-67ae-4e5d-b3d2-e96e4d2c0669",
+    "b4409c6f-6503-4664-bd73-89305bbb6ff7"
+  ],
+  "markets": {
+    "f56c7309-ad1c-439e-80c3-47293f092d79": {
+      "event_id": "b97b6ee8-57a4-4fbf-9585-3b8fcd693163",
+      "event_title": "Colorado Avalanche at Philadelphia Flyers",
+      "event_start": "2026-10-19T23:00:00.000000Z",
+      "competition": "NHL",
+      "grouping_name": "Moneyline",
+      "position": "Colorado Avalanche",
+      "title": "NHL COL @ PHI",
+      "max_price": "1.0000",
+      "market_id": "f56c7309-ad1c-439e-80c3-47293f092d79",
+      "group_title": "Avalanche"
+    },
+    "bb239e17-ce7e-48b7-be1e-93356670a983": {
+      "event_id": "667e8c68-9371-4f95-9766-11bb59da66ca",
+      "event_title": "Anaheim Ducks at New York Rangers",
+      "event_start": "2026-10-19T23:00:00.000000Z",
+      "competition": "NHL",
+      "grouping_name": "Moneyline",
+      "position": "New York Rangers",
+      "title": "NHL ANA @ NYR",
+      "max_price": "1.0000",
+      "market_id": "bb239e17-ce7e-48b7-be1e-93356670a983",
+      "group_title": "Rangers"
+    },
+    "a158f76f-bf41-4cdc-836d-fe72b344c0da": {
+      "event_id": "667e8c68-9371-4f95-9766-11bb59da66ca",
+      "event_title": "Anaheim Ducks at New York Rangers",
+      "event_start": "2026-10-19T23:00:00.000000Z",
+      "competition": "NHL",
+      "grouping_name": "Moneyline",
+      "position": "Anaheim Ducks",
+      "title": "NHL ANA @ NYR",
+      "max_price": "1.0000",
+      "market_id": "a158f76f-bf41-4cdc-836d-fe72b344c0da",
+      "group_title": "Ducks"
+    },
+    "24d3c882-c3bc-4c71-b4f8-81ef3c9b2073": {
+      "event_id": "b97b6ee8-57a4-4fbf-9585-3b8fcd693163",
+      "event_title": "Colorado Avalanche at Philadelphia Flyers",
+      "event_start": "2026-10-19T23:00:00.000000Z",
+      "competition": "NHL",
+      "grouping_name": "Moneyline",
+      "position": "Philadelphia Flyers",
+      "title": "NHL COL @ PHI",
+      "max_price": "1.0000",
+      "market_id": "24d3c882-c3bc-4c71-b4f8-81ef3c9b2073",
+      "group_title": "Flyers"
+    },
+    "358aaf21-8ab5-4781-934b-8cab6731220f": {
+      "event_id": "8bca5413-ae4b-4d9d-8d6a-d4b4c3165080",
+      "event_title": "San Jose Sharks at Toronto Maple Leafs",
+      "event_start": "2026-10-19T23:30:00.000000Z",
+      "competition": "NHL",
+      "grouping_name": "Moneyline",
+      "position": "Toronto Maple Leafs",
+      "title": "NHL SJ @ TOR",
+      "max_price": "1.0000",
+      "market_id": "358aaf21-8ab5-4781-934b-8cab6731220f",
+      "group_title": "Maple Leafs"
+    },
+    "760eae83-eaf8-45eb-93b8-d44cd60be57d": {
+      "event_id": "8bca5413-ae4b-4d9d-8d6a-d4b4c3165080",
+      "event_title": "San Jose Sharks at Toronto Maple Leafs",
+      "event_start": "2026-10-19T23:30:00.000000Z",
+      "competition": "NHL",
+      "grouping_name": "Moneyline",
+      "position": "San Jose Sharks",
+      "title": "NHL SJ @ TOR",
+      "max_price": "1.0000",
+      "market_id": "760eae83-eaf8-45eb-93b8-d44cd60be57d",
+      "group_title": "Sharks"
+    },
+    "452403ec-37f9-4bd9-8756-1fd2deeb8e4f": {
+      "event_id": "a89eaa53-7ae9-46e0-8aa1-45d5ac12d7f2",
+      "event_title": "Pittsburgh Penguins at Utah Mammoth",
+      "event_start": "2026-10-20T01:00:00.000000Z",
+      "competition": "NHL",
+      "grouping_name": "Moneyline",
+      "position": "Pittsburgh Penguins",
+      "title": "NHL PIT @ UTA",
+      "max_price": "1.0000",
+      "market_id": "452403ec-37f9-4bd9-8756-1fd2deeb8e4f",
+      "group_title": "Penguins"
+    },
+    "9d4dd227-fe3b-4585-ba9a-7ca998937a32": {
+      "event_id": "a89eaa53-7ae9-46e0-8aa1-45d5ac12d7f2",
+      "event_title": "Pittsburgh Penguins at Utah Mammoth",
+      "event_start": "2026-10-20T01:00:00.000000Z",
+      "competition": "NHL",
+      "grouping_name": "Moneyline",
+      "position": "Utah Mammoth",
+      "title": "NHL PIT @ UTA",
+      "max_price": "1.0000",
+      "market_id": "9d4dd227-fe3b-4585-ba9a-7ca998937a32",
+      "group_title": "Mammoth"
+    },
+    "df5e23e1-d1b5-4b10-afa9-abc0b7b88d45": {
+      "event_id": "cf2a1420-11f0-49d6-bd81-629c848eba60",
+      "event_title": "Los Angeles Kings at Washington Capitals",
+      "event_start": "2026-10-20T23:00:00.000000Z",
+      "competition": "NHL",
+      "grouping_name": "Moneyline",
+      "position": "Washington Capitals",
+      "title": "NHL LA @ WSH",
+      "max_price": "1.0000",
+      "market_id": "df5e23e1-d1b5-4b10-afa9-abc0b7b88d45",
+      "group_title": "Capitals"
+    },
+    "e8afde81-5f95-4d8c-8a00-97931e90d12c": {
+      "event_id": "d56c91ec-b454-454d-a627-878b7f962c41",
+      "event_title": "San Jose Sharks at Montreal Canadiens",
+      "event_start": "2026-10-20T23:00:00.000000Z",
+      "competition": "NHL",
+      "grouping_name": "Moneyline",
+      "position": "San Jose Sharks",
+      "title": "NHL SJ @ MTL",
+      "max_price": "1.0000",
+      "market_id": "e8afde81-5f95-4d8c-8a00-97931e90d12c",
+      "group_title": "Sharks"
+    },
+    "6ebfd8d9-e16a-4966-a548-0e6ae3a93bc4": {
+      "event_id": "8d0df63c-2c75-42a7-abf9-5609a857e30d",
+      "event_title": "Toronto Maple Leafs at Columbus Blue Jackets",
+      "event_start": "2026-10-20T23:00:00.000000Z",
+      "competition": "NHL",
+      "grouping_name": "Moneyline",
+      "position": "Columbus Blue Jackets",
+      "title": "NHL TOR @ CBJ",
+      "max_price": "1.0000",
+      "market_id": "6ebfd8d9-e16a-4966-a548-0e6ae3a93bc4",
+      "group_title": "Blue Jackets"
+    },
+    "1311b10b-71c3-4659-af0d-9f8581cfd6f1": {
+      "event_id": "e14b5950-4701-42df-bb1e-fce67d196a00",
+      "event_title": "Colorado Avalanche at New Jersey Devils",
+      "event_start": "2026-10-20T23:00:00.000000Z",
+      "competition": "NHL",
+      "grouping_name": "Moneyline",
+      "position": "Colorado Avalanche",
+      "title": "NHL COL @ NJ",
+      "max_price": "1.0000",
+      "market_id": "1311b10b-71c3-4659-af0d-9f8581cfd6f1",
+      "group_title": "Avalanche"
+    },
+    "0a374b17-e397-460c-ba8f-d118da64b73f": {
+      "event_id": "cf2a1420-11f0-49d6-bd81-629c848eba60",
+      "event_title": "Los Angeles Kings at Washington Capitals",
+      "event_start": "2026-10-20T23:00:00.000000Z",
+      "competition": "NHL",
+      "grouping_name": "Moneyline",
+      "position": "Los Angeles Kings",
+      "title": "NHL LA @ WSH",
+      "max_price": "1.0000",
+      "market_id": "0a374b17-e397-460c-ba8f-d118da64b73f",
+      "group_title": "Kings"
+    },
+    "8beca9c9-0c25-4865-8f6b-e673dc021383": {
+      "event_id": "e60bd310-0d26-4be8-ae38-1c025689be64",
+      "event_title": "Anaheim Ducks at New York Islanders",
+      "event_start": "2026-10-20T23:00:00.000000Z",
+      "competition": "NHL",
+      "grouping_name": "Moneyline",
+      "position": "New York Islanders",
+      "title": "NHL ANA @ NYI",
+      "max_price": "1.0000",
+      "market_id": "8beca9c9-0c25-4865-8f6b-e673dc021383",
+      "group_title": "Islanders"
+    },
+    "add043ca-c254-4234-a7bd-769757bde0d7": {
+      "event_id": "d56c91ec-b454-454d-a627-878b7f962c41",
+      "event_title": "San Jose Sharks at Montreal Canadiens",
+      "event_start": "2026-10-20T23:00:00.000000Z",
+      "competition": "NHL",
+      "grouping_name": "Moneyline",
+      "position": "Montreal Canadiens",
+      "title": "NHL SJ @ MTL",
+      "max_price": "1.0000",
+      "market_id": "add043ca-c254-4234-a7bd-769757bde0d7",
+      "group_title": "Canadiens"
+    },
+    "a469c822-9228-4e2d-998f-d47adc6db796": {
+      "event_id": "e14b5950-4701-42df-bb1e-fce67d196a00",
+      "event_title": "Colorado Avalanche at New Jersey Devils",
+      "event_start": "2026-10-20T23:00:00.000000Z",
+      "competition": "NHL",
+      "grouping_name": "Moneyline",
+      "position": "New Jersey Devils",
+      "title": "NHL COL @ NJ",
+      "max_price": "1.0000",
+      "market_id": "a469c822-9228-4e2d-998f-d47adc6db796",
+      "group_title": "Devils"
+    },
+    "1617bcc7-1cab-4582-83d4-d44eba961ae2": {
+      "event_id": "e60bd310-0d26-4be8-ae38-1c025689be64",
+      "event_title": "Anaheim Ducks at New York Islanders",
+      "event_start": "2026-10-20T23:00:00.000000Z",
+      "competition": "NHL",
+      "grouping_name": "Moneyline",
+      "position": "Anaheim Ducks",
+      "title": "NHL ANA @ NYI",
+      "max_price": "1.0000",
+      "market_id": "1617bcc7-1cab-4582-83d4-d44eba961ae2",
+      "group_title": "Ducks"
+    },
+    "0fa1dfbd-b111-4b99-b7a5-b289874d304d": {
+      "event_id": "8d0df63c-2c75-42a7-abf9-5609a857e30d",
+      "event_title": "Toronto Maple Leafs at Columbus Blue Jackets",
+      "event_start": "2026-10-20T23:00:00.000000Z",
+      "competition": "NHL",
+      "grouping_name": "Moneyline",
+      "position": "Toronto Maple Leafs",
+      "title": "NHL TOR @ CBJ",
+      "max_price": "1.0000",
+      "market_id": "0fa1dfbd-b111-4b99-b7a5-b289874d304d",
+      "group_title": "Maple Leafs"
+    },
+    "48b729d5-a6b1-4bb8-ab16-ac3f9673a193": {
+      "event_id": "47057f9f-e404-4d9a-a8b4-0b91eb969900",
+      "event_title": "Boston Bruins at Dallas Stars",
+      "event_start": "2026-10-21T00:00:00.000000Z",
+      "competition": "NHL",
+      "grouping_name": "Moneyline",
+      "position": "Boston Bruins",
+      "title": "NHL BOS @ DAL",
+      "max_price": "1.0000",
+      "market_id": "48b729d5-a6b1-4bb8-ab16-ac3f9673a193",
+      "group_title": "Bruins"
+    },
+    "6799816f-f68b-4562-bfc0-3f8347babef0": {
+      "event_id": "47057f9f-e404-4d9a-a8b4-0b91eb969900",
+      "event_title": "Boston Bruins at Dallas Stars",
+      "event_start": "2026-10-21T00:00:00.000000Z",
+      "competition": "NHL",
+      "grouping_name": "Moneyline",
+      "position": "Dallas Stars",
+      "title": "NHL BOS @ DAL",
+      "max_price": "1.0000",
+      "market_id": "6799816f-f68b-4562-bfc0-3f8347babef0",
+      "group_title": "Stars"
+    },
+    "8094c488-c248-4ba6-9110-de9647f8b270": {
+      "event_id": "97ad0388-816c-4d0f-b303-45850d084721",
+      "event_title": "Winnipeg Jets at St. Louis Blues",
+      "event_start": "2026-10-21T00:00:00.000000Z",
+      "competition": "NHL",
+      "grouping_name": "Moneyline",
+      "position": "Winnipeg Jets",
+      "title": "NHL WPG @ STL",
+      "max_price": "1.0000",
+      "market_id": "8094c488-c248-4ba6-9110-de9647f8b270",
+      "group_title": "Jets"
+    },
+    "42cee60b-c005-4dc8-b66a-751cdbc9ec22": {
+      "event_id": "97ad0388-816c-4d0f-b303-45850d084721",
+      "event_title": "Winnipeg Jets at St. Louis Blues",
+      "event_start": "2026-10-21T00:00:00.000000Z",
+      "competition": "NHL",
+      "grouping_name": "Moneyline",
+      "position": "St. Louis Blues",
+      "title": "NHL WPG @ STL",
+      "max_price": "1.0000",
+      "market_id": "42cee60b-c005-4dc8-b66a-751cdbc9ec22",
+      "group_title": "Blues"
+    },
+    "79adf77a-1d19-4896-a9e5-42d88d572146": {
+      "event_id": "97169c79-0dfd-40b6-981a-25fb8a918c95",
+      "event_title": "Minnesota Wild at Edmonton Oilers",
+      "event_start": "2026-10-21T01:00:00.000000Z",
+      "competition": "NHL",
+      "grouping_name": "Moneyline",
+      "position": "Edmonton Oilers",
+      "title": "NHL MIN @ EDM",
+      "max_price": "1.0000",
+      "market_id": "79adf77a-1d19-4896-a9e5-42d88d572146",
+      "group_title": "Oilers"
+    },
+    "7bcd13e1-49f3-4c35-b4f0-2c835627109a": {
+      "event_id": "97169c79-0dfd-40b6-981a-25fb8a918c95",
+      "event_title": "Minnesota Wild at Edmonton Oilers",
+      "event_start": "2026-10-21T01:00:00.000000Z",
+      "competition": "NHL",
+      "grouping_name": "Moneyline",
+      "position": "Minnesota Wild",
+      "title": "NHL MIN @ EDM",
+      "max_price": "1.0000",
+      "market_id": "7bcd13e1-49f3-4c35-b4f0-2c835627109a",
+      "group_title": "Wild"
+    },
+    "b8583f23-fb4b-43fc-b3fc-7fdc8dc9ad73": {
+      "event_id": "79f62ebc-eb41-4111-a414-9bfc7f50d6b5",
+      "event_title": "Detroit Red Wings at Seattle Kraken",
+      "event_start": "2026-10-21T01:40:00.000000Z",
+      "competition": "NHL",
+      "grouping_name": "Moneyline",
+      "position": "Detroit Red Wings",
+      "title": "NHL DET @ SEA",
+      "max_price": "1.0000",
+      "market_id": "b8583f23-fb4b-43fc-b3fc-7fdc8dc9ad73",
+      "group_title": "Red Wings"
+    },
+    "cdd618e4-408f-4050-99be-985048b3c434": {
+      "event_id": "79f62ebc-eb41-4111-a414-9bfc7f50d6b5",
+      "event_title": "Detroit Red Wings at Seattle Kraken",
+      "event_start": "2026-10-21T01:40:00.000000Z",
+      "competition": "NHL",
+      "grouping_name": "Moneyline",
+      "position": "Seattle Kraken",
+      "title": "NHL DET @ SEA",
+      "max_price": "1.0000",
+      "market_id": "cdd618e4-408f-4050-99be-985048b3c434",
+      "group_title": "Kraken"
+    },
+    "0ce52405-97a9-45c3-a6ba-68067d8a8c3c": {
+      "event_id": "a3649db5-b686-45e1-978d-3ff55b1dcc46",
+      "event_title": "Carolina Hurricanes at Vancouver Canucks",
+      "event_start": "2026-10-21T02:00:00.000000Z",
+      "competition": "NHL",
+      "grouping_name": "Moneyline",
+      "position": "Vancouver Canucks",
+      "title": "NHL CAR @ VAN",
+      "max_price": "1.0000",
+      "market_id": "0ce52405-97a9-45c3-a6ba-68067d8a8c3c",
+      "group_title": "Canucks"
+    },
+    "8f68eb3c-21e6-40c3-8735-2bf4f4f10935": {
+      "event_id": "a3649db5-b686-45e1-978d-3ff55b1dcc46",
+      "event_title": "Carolina Hurricanes at Vancouver Canucks",
+      "event_start": "2026-10-21T02:00:00.000000Z",
+      "competition": "NHL",
+      "grouping_name": "Moneyline",
+      "position": "Carolina Hurricanes",
+      "title": "NHL CAR @ VAN",
+      "max_price": "1.0000",
+      "market_id": "8f68eb3c-21e6-40c3-8735-2bf4f4f10935",
+      "group_title": "Hurricanes"
+    },
+    "ff420b7b-67ae-4e5d-b3d2-e96e4d2c0669": {
+      "event_id": "f2f23e00-d212-4010-81a1-09b5fc969525",
+      "event_title": "Tampa Bay Lightning at Vegas Golden Knights",
+      "event_start": "2026-10-21T02:30:00.000000Z",
+      "competition": "NHL",
+      "grouping_name": "Moneyline",
+      "position": "Vegas Golden Knights",
+      "title": "NHL TB @ VGK",
+      "max_price": "1.0000",
+      "market_id": "ff420b7b-67ae-4e5d-b3d2-e96e4d2c0669",
+      "group_title": "Golden Knights"
+    },
+    "b4409c6f-6503-4664-bd73-89305bbb6ff7": {
+      "event_id": "f2f23e00-d212-4010-81a1-09b5fc969525",
+      "event_title": "Tampa Bay Lightning at Vegas Golden Knights",
+      "event_start": "2026-10-21T02:30:00.000000Z",
+      "competition": "NHL",
+      "grouping_name": "Moneyline",
+      "position": "Tampa Bay Lightning",
+      "title": "NHL TB @ VGK",
+      "max_price": "1.0000",
+      "market_id": "b4409c6f-6503-4664-bd73-89305bbb6ff7",
+      "group_title": "Lightning"
+    }
+  },
+  "orderbooks": {
+    "f56c7309-ad1c-439e-80c3-47293f092d79": {
+      "b": [
+        {
+          "tl": 267.33,
+          "q": 399.0,
+          "p": 0.67,
+          "tc": 399.0,
+          "l": 267.33
+        },
+        {
+          "tl": 554.43,
+          "q": 435.0,
+          "p": 0.66,
+          "tc": 834.0,
+          "l": 287.1
+        },
+        {
+          "tl": 806.63,
+          "q": 388.0,
+          "p": 0.65,
+          "tc": 1222.0,
+          "l": 252.2
+        }
+      ],
+      "o": [
+        {
+          "tl": 288.26,
+          "q": 406.0,
+          "p": 0.71,
+          "tc": 406.0,
+          "l": 288.26
+        },
+        {
+          "tl": 600.02,
+          "q": 433.0,
+          "p": 0.72,
+          "tc": 839.0,
+          "l": 311.76
+        },
+        {
+          "tl": 906.62,
+          "q": 420.0,
+          "p": 0.73,
+          "tc": 1259.0,
+          "l": 306.6
+        }
+      ]
+    },
+    "bb239e17-ce7e-48b7-be1e-93356670a983": {
+      "b": [
+        {
+          "tl": 1386.2,
+          "q": 2390.0,
+          "p": 0.58,
+          "tc": 2390.0,
+          "l": 1386.2
+        },
+        {
+          "tl": 1601.8,
+          "q": 385.0,
+          "p": 0.56,
+          "tc": 2775.0,
+          "l": 215.6
+        },
+        {
+          "tl": 1838.3,
+          "q": 430.0,
+          "p": 0.55,
+          "tc": 3205.0,
+          "l": 236.5
+        },
+        {
+          "tl": 2066.18,
+          "q": 422.0,
+          "p": 0.54,
+          "tc": 3627.0,
+          "l": 227.88
+        }
+      ],
+      "o": [
+        {
+          "tl": 240.0,
+          "q": 400.0,
+          "p": 0.6,
+          "tc": 400.0,
+          "l": 240.0
+        },
+        {
+          "tl": 2585.45,
+          "q": 3845.0,
+          "p": 0.61,
+          "tc": 4245.0,
+          "l": 2345.45
+        },
+        {
+          "tl": 2861.35,
+          "q": 445.0,
+          "p": 0.62,
+          "tc": 4690.0,
+          "l": 275.9
+        }
+      ]
+    },
+    "a158f76f-bf41-4cdc-836d-fe72b344c0da": {
+      "b": [
+        {
+          "tl": 182.0,
+          "q": 455.0,
+          "p": 0.4,
+          "tc": 455.0,
+          "l": 182.0
+        },
+        {
+          "tl": 345.41,
+          "q": 419.0,
+          "p": 0.39,
+          "tc": 874.0,
+          "l": 163.41
+        },
+        {
+          "tl": 511.85,
+          "q": 438.0,
+          "p": 0.38,
+          "tc": 1312.0,
+          "l": 166.44
+        }
+      ],
+      "o": [
+        {
+          "tl": 192.72,
+          "q": 438.0,
+          "p": 0.44,
+          "tc": 438.0,
+          "l": 192.72
+        },
+        {
+          "tl": 391.62,
+          "q": 442.0,
+          "p": 0.45,
+          "tc": 880.0,
+          "l": 198.9
+        },
+        {
+          "tl": 614.34,
+          "q": 464.0,
+          "p": 0.48,
+          "tc": 1344.0,
+          "l": 222.72
+        }
+      ]
+    },
+    "24d3c882-c3bc-4c71-b4f8-81ef3c9b2073": {
+      "b": [
+        {
+          "tl": 131.95,
+          "q": 455.0,
+          "p": 0.29,
+          "tc": 455.0,
+          "l": 131.95
+        },
+        {
+          "tl": 261.87,
+          "q": 464.0,
+          "p": 0.28,
+          "tc": 919.0,
+          "l": 129.92
+        },
+        {
+          "tl": 366.9,
+          "q": 389.0,
+          "p": 0.27,
+          "tc": 1308.0,
+          "l": 105.03
+        }
+      ],
+      "o": [
+        {
+          "tl": 128.04,
+          "q": 388.0,
+          "p": 0.33,
+          "tc": 388.0,
+          "l": 128.04
+        },
+        {
+          "tl": 279.34,
+          "q": 445.0,
+          "p": 0.34,
+          "tc": 833.0,
+          "l": 151.3
+        },
+        {
+          "tl": 416.54,
+          "q": 392.0,
+          "p": 0.35,
+          "tc": 1225.0,
+          "l": 137.2
+        }
+      ]
+    },
+    "358aaf21-8ab5-4781-934b-8cab6731220f": {
+      "b": [
+        {
+          "tl": 227.37,
+          "q": 429.0,
+          "p": 0.53,
+          "tc": 429.0,
+          "l": 227.37
+        },
+        {
+          "tl": 406.25,
+          "q": 344.0,
+          "p": 0.52,
+          "tc": 773.0,
+          "l": 178.88
+        },
+        {
+          "tl": 617.39,
+          "q": 414.0,
+          "p": 0.51,
+          "tc": 1187.0,
+          "l": 211.14
+        }
+      ],
+      "o": [
+        {
+          "tl": 242.82,
+          "q": 426.0,
+          "p": 0.57,
+          "tc": 426.0,
+          "l": 242.82
+        },
+        {
+          "tl": 452.2,
+          "q": 361.0,
+          "p": 0.58,
+          "tc": 787.0,
+          "l": 209.38
+        },
+        {
+          "tl": 2729.01,
+          "q": 3859.0,
+          "p": 0.59,
+          "tc": 4646.0,
+          "l": 2276.81
+        }
+      ]
+    },
+    "760eae83-eaf8-45eb-93b8-d44cd60be57d": {
+      "b": [
+        {
+          "tl": 186.12,
+          "q": 423.0,
+          "p": 0.44,
+          "tc": 423.0,
+          "l": 186.12
+        },
+        {
+          "tl": 325.01,
+          "q": 323.0,
+          "p": 0.43,
+          "tc": 746.0,
+          "l": 138.89
+        },
+        {
+          "tl": 513.17,
+          "q": 448.0,
+          "p": 0.42,
+          "tc": 1194.0,
+          "l": 188.16
+        }
+      ],
+      "o": [
+        {
+          "tl": 188.94,
+          "q": 402.0,
+          "p": 0.47,
+          "tc": 402.0,
+          "l": 188.94
+        },
+        {
+          "tl": 376.14,
+          "q": 390.0,
+          "p": 0.48,
+          "tc": 792.0,
+          "l": 187.2
+        },
+        {
+          "tl": 542.25,
+          "q": 339.0,
+          "p": 0.49,
+          "tc": 1131.0,
+          "l": 166.11
+        }
+      ]
+    },
+    "452403ec-37f9-4bd9-8756-1fd2deeb8e4f": {
+      "b": [
+        {
+          "tl": 139.06,
+          "q": 409.0,
+          "p": 0.34,
+          "tc": 409.0,
+          "l": 139.06
+        },
+        {
+          "tl": 282.94,
+          "q": 436.0,
+          "p": 0.33,
+          "tc": 845.0,
+          "l": 143.88
+        },
+        {
+          "tl": 326.94,
+          "q": 440.0,
+          "p": 0.1,
+          "tc": 1285.0,
+          "l": 44.0
+        }
+      ],
+      "o": [
+        {
+          "tl": 153.52,
+          "q": 404.0,
+          "p": 0.38,
+          "tc": 404.0,
+          "l": 153.52
+        },
+        {
+          "tl": 329.41,
+          "q": 451.0,
+          "p": 0.39,
+          "tc": 855.0,
+          "l": 175.89
+        },
+        {
+          "tl": 505.01,
+          "q": 439.0,
+          "p": 0.4,
+          "tc": 1294.0,
+          "l": 175.6
+        }
+      ]
+    },
+    "9d4dd227-fe3b-4585-ba9a-7ca998937a32": {
+      "b": [
+        {
+          "tl": 250.48,
+          "q": 404.0,
+          "p": 0.62,
+          "tc": 404.0,
+          "l": 250.48
+        },
+        {
+          "tl": 493.87,
+          "q": 399.0,
+          "p": 0.61,
+          "tc": 803.0,
+          "l": 243.39
+        },
+        {
+          "tl": 2162.47,
+          "q": 2781.0,
+          "p": 0.6,
+          "tc": 3584.0,
+          "l": 1668.6
+        }
+      ],
+      "o": [
+        {
+          "tl": 2497.28,
+          "q": 3902.0,
+          "p": 0.64,
+          "tc": 3902.0,
+          "l": 2497.28
+        },
+        {
+          "tl": 2781.08,
+          "q": 430.0,
+          "p": 0.66,
+          "tc": 4332.0,
+          "l": 283.8
+        },
+        {
+          "tl": 3079.23,
+          "q": 445.0,
+          "p": 0.67,
+          "tc": 4777.0,
+          "l": 298.15
+        },
+        {
+          "tl": 3403.33,
+          "q": 463.0,
+          "p": 0.7,
+          "tc": 5240.0,
+          "l": 324.1
+        }
+      ]
+    },
+    "df5e23e1-d1b5-4b10-afa9-abc0b7b88d45": {
+      "b": [
+        {
+          "tl": 1373.12,
+          "q": 2452.0,
+          "p": 0.56,
+          "tc": 2452.0,
+          "l": 1373.12
+        }
+      ],
+      "o": [
+        {
+          "tl": 1632.15,
+          "q": 2511.0,
+          "p": 0.65,
+          "tc": 2511.0,
+          "l": 1632.15
+        }
+      ]
+    },
+    "e8afde81-5f95-4d8c-8a00-97931e90d12c": {
+      "b": [],
+      "o": []
+    },
+    "6ebfd8d9-e16a-4966-a548-0e6ae3a93bc4": {
+      "b": [],
+      "o": []
+    },
+    "1311b10b-71c3-4659-af0d-9f8581cfd6f1": {
+      "b": [],
+      "o": []
+    },
+    "0a374b17-e397-460c-ba8f-d118da64b73f": {
+      "b": [],
+      "o": []
+    },
+    "8beca9c9-0c25-4865-8f6b-e673dc021383": {
+      "b": [],
+      "o": []
+    },
+    "add043ca-c254-4234-a7bd-769757bde0d7": {
+      "b": [],
+      "o": []
+    },
+    "a469c822-9228-4e2d-998f-d47adc6db796": {
+      "b": [],
+      "o": []
+    },
+    "1617bcc7-1cab-4582-83d4-d44eba961ae2": {
+      "b": [],
+      "o": []
+    },
+    "0fa1dfbd-b111-4b99-b7a5-b289874d304d": {
+      "b": [],
+      "o": []
+    },
+    "48b729d5-a6b1-4bb8-ab16-ac3f9673a193": {
+      "b": [],
+      "o": []
+    },
+    "6799816f-f68b-4562-bfc0-3f8347babef0": {
+      "b": [
+        {
+          "tl": 1386.0,
+          "q": 2475.0,
+          "p": 0.56,
+          "tc": 2475.0,
+          "l": 1386.0
+        }
+      ],
+      "o": [
+        {
+          "tl": 1624.35,
+          "q": 2499.0,
+          "p": 0.65,
+          "tc": 2499.0,
+          "l": 1624.35
+        }
+      ]
+    },
+    "8094c488-c248-4ba6-9110-de9647f8b270": {
+      "b": [],
+      "o": []
+    },
+    "42cee60b-c005-4dc8-b66a-751cdbc9ec22": {
+      "b": [
+        {
+          "tl": 1361.88,
+          "q": 2619.0,
+          "p": 0.52,
+          "tc": 2619.0,
+          "l": 1361.88
+        }
+      ],
+      "o": [
+        {
+          "tl": 1758.02,
+          "q": 2882.0,
+          "p": 0.61,
+          "tc": 2882.0,
+          "l": 1758.02
+        }
+      ]
+    },
+    "79adf77a-1d19-4896-a9e5-42d88d572146": {
+      "b": [
+        {
+          "tl": 1355.0,
+          "q": 2710.0,
+          "p": 0.5,
+          "tc": 2710.0,
+          "l": 1355.0
+        }
+      ],
+      "o": [
+        {
+          "tl": 1498.01,
+          "q": 2539.0,
+          "p": 0.59,
+          "tc": 2539.0,
+          "l": 1498.01
+        }
+      ]
+    },
+    "7bcd13e1-49f3-4c35-b4f0-2c835627109a": {
+      "b": [],
+      "o": []
+    },
+    "b8583f23-fb4b-43fc-b3fc-7fdc8dc9ad73": {
+      "b": [],
+      "o": []
+    },
+    "cdd618e4-408f-4050-99be-985048b3c434": {
+      "b": [
+        {
+          "tl": 1347.8,
+          "q": 2930.0,
+          "p": 0.46,
+          "tc": 2930.0,
+          "l": 1347.8
+        }
+      ],
+      "o": [
+        {
+          "tl": 1513.12,
+          "q": 2702.0,
+          "p": 0.56,
+          "tc": 2702.0,
+          "l": 1513.12
+        }
+      ]
+    },
+    "0ce52405-97a9-45c3-a6ba-68067d8a8c3c": {
+      "b": [
+        {
+          "tl": 550.75,
+          "q": 2203.0,
+          "p": 0.25,
+          "tc": 2203.0,
+          "l": 550.75
+        }
+      ],
+      "o": [
+        {
+          "tl": 665.94,
+          "q": 2018.0,
+          "p": 0.33,
+          "tc": 2018.0,
+          "l": 665.94
+        }
+      ]
+    },
+    "8f68eb3c-21e6-40c3-8735-2bf4f4f10935": {
+      "b": [],
+      "o": []
+    },
+    "ff420b7b-67ae-4e5d-b3d2-e96e4d2c0669": {
+      "b": [
+        {
+          "tl": 1388.85,
+          "q": 2955.0,
+          "p": 0.47,
+          "tc": 2955.0,
+          "l": 1388.85
+        }
+      ],
+      "o": [
+        {
+          "tl": 1593.76,
+          "q": 2846.0,
+          "p": 0.56,
+          "tc": 2846.0,
+          "l": 1593.76
+        }
+      ]
+    },
+    "b4409c6f-6503-4664-bd73-89305bbb6ff7": {
+      "b": [],
+      "o": []
+    }
+  }
+}

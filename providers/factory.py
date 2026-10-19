@@ -85,6 +85,7 @@ def build_exchange_provider(stx_config: Optional[StxConfig] = None):
             _resolve_private_key(stx_config.private_key_path),
             base_url=stx_config.base_url,
             fee_factor=stx_config.fee_factor,
+            require_ws_books=True,
         )
     return MockExchangeProvider()
 

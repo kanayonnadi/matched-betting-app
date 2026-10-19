@@ -277,6 +277,17 @@ def verify_opportunity(
             "raw STX order book or sportsbook quote unavailable for independent verification",
             equivalence, schedule, now,
         )
+    if getattr(raw_book, "freshness_verified", None) is False:
+        return _blocked(
+            "STX order book freshness is unverified (no authoritative WebSocket timestamp)",
+            equivalence, schedule, now,
+        )
+    completeness = getattr(raw_book, "completeness", "UNKNOWN")
+    if completeness != "COMPLETE":
+        return _blocked(
+            f"STX order book completeness {completeness}; authoritative WebSocket snapshot required",
+            equivalence, schedule, now,
+        )
 
     M = _dec(raw_book.max_price)
     stake = _dec(opportunity.stake)

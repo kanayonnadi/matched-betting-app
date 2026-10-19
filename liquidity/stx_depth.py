@@ -39,6 +39,11 @@ def build_order_book(
     timestamp=None,
     source="stx-rest",
     completeness: str = DepthCompleteness.UNKNOWN.value,
+    *,
+    received_at=None,
+    source_timestamp=None,
+    timestamp_source: str = "unknown",
+    freshness_verified: bool = True,
 ):
     max_price = _decimal(max_price)
     if max_price is None or max_price <= ZERO:
@@ -50,10 +55,14 @@ def build_order_book(
     return OrderBook(
         max_price=max_price,
         levels=levels,
-        timestamp=timestamp,
+        timestamp=source_timestamp or received_at or timestamp,
         source=source,
         completeness=completeness,
         malformed_levels=malformed,
+        received_at=received_at,
+        source_timestamp=source_timestamp,
+        timestamp_source=timestamp_source,
+        freshness_verified=freshness_verified,
     )
 
 
@@ -63,6 +72,11 @@ def build_order_book_from_ws(
     timestamp=None,
     source="stx-ws",
     completeness: str = DepthCompleteness.COMPLETE.value,
+    *,
+    received_at=None,
+    source_timestamp=None,
+    timestamp_source: str = "ws_received",
+    freshness_verified: bool = True,
 ):
     """``ob`` is ``{"b": [{"p","q","l","tc","tl"}, ...]}`` (market channel)."""
     max_price = _decimal(max_price)
@@ -75,8 +89,12 @@ def build_order_book_from_ws(
     return OrderBook(
         max_price=max_price,
         levels=levels,
-        timestamp=timestamp,
+        timestamp=source_timestamp or received_at or timestamp,
         source=source,
         completeness=completeness,
         malformed_levels=malformed,
+        received_at=received_at,
+        source_timestamp=source_timestamp,
+        timestamp_source=timestamp_source,
+        freshness_verified=freshness_verified,
     )

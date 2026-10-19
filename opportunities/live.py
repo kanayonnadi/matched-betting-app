@@ -25,7 +25,7 @@ def discover_live_opportunities(
     kind: BetKind = BetKind.QUALIFYING,
     event_matcher: Optional[EventMatcher] = None,
     market_matcher: Optional[MarketMatcher] = None,
-    enrich_order_books: bool = False,
+    enrich_order_books: bool = True,
 ):
     event_matcher = event_matcher or EventMatcher()
     market_matcher = market_matcher or MarketMatcher()
@@ -54,7 +54,16 @@ def discover_live_opportunities(
             for event_match in event_matches:
                 market_ids.extend(exchange_provider.market_ids(event_match.exchange_event.event_id))
             if market_ids and hasattr(exchange_provider, "load_order_books"):
-                exchange_provider.load_order_books(market_ids)
+                try:
+                    exchange_provider.load_order_books(market_ids)
+                except Exception as exc:  # noqa: BLE001 - never fall back to REST
+                    logger.warning(
+                        "STX WebSocket order-book enrichment failed for %s: %s",
+                        route.stx_sport, exc,
+                    )
+                    # Without authoritative depth this route cannot produce
+                    # executable opportunities; skip rather than use REST.
+                    continue
 
         for event_match in event_matches:
             opportunities.extend(

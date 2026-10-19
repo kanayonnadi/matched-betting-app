@@ -81,6 +81,13 @@ class OrderBook:
     source: str = "stx"
     completeness: str = DepthCompleteness.UNKNOWN.value
     malformed_levels: int = 0
+    # Timestamp provenance: ``timestamp`` is the observation time used for
+    # freshness. ``source_timestamp`` is the exchange's own timestamp when
+    # available; ``received_at`` is when this process received the book.
+    received_at: Optional[datetime] = None
+    source_timestamp: Optional[datetime] = None
+    timestamp_source: str = "unknown"
+    freshness_verified: bool = True
 
     def __post_init__(self):
         ordered = tuple(sorted(self.levels, key=lambda level: level.price, reverse=True))

@@ -199,15 +199,21 @@ class StxProvider(OddsProvider):
         client=None,
         clock=None,
         ws_connector=None,
+        require_ws_books: bool = True,
     ):
         self._client = client or StxClient(key_id, private_key, base_url=base_url, clock=clock)
         self._base_url = base_url
         self._fee_factor = Decimal(str(fee_factor))
         self._clock = clock or (lambda: datetime.now(timezone.utc))
         self._ws_connector = ws_connector
+        self._require_ws_books = require_ws_books
         self._events = {}
         self._grouped = {}
         self._books = {}
+        self._missing_books = {}
+        self._market_received_at = {}
+        self._event_received_at = {}
+        self._markets_fetched_at = None
 
     def _fetch_markets(self, sport: str):
         results = []
@@ -221,6 +227,14 @@ class StxProvider(OddsProvider):
             cursor = data.get("cursor")
             if not cursor:
                 break
+        # REST list_markets carries no per-book timestamp; record the
+        # observation time once for the whole fetch, never at read time.
+        fetched_at = self._clock()
+        self._markets_fetched_at = fetched_at
+        for market in results:
+            market_id = market.get("market_id")
+            if market_id:
+                self._market_received_at[market_id] = fetched_at
         return results
 
     def get_events(self, sport: str):
@@ -250,6 +264,7 @@ class StxProvider(OddsProvider):
             )
             self._events[event_id] = event
             self._grouped[event_id] = markets
+            self._event_received_at[event_id] = self._markets_fetched_at or self._clock()
             events.append(event)
         return tuple(events)
 
@@ -286,18 +301,38 @@ class StxProvider(OddsProvider):
             return ()
         quotes = []
         for raw_market in self._grouped[event_id]:
-            book = self._books.get(raw_market.get("market_id"))
+            market_id = raw_market.get("market_id")
+            cached = self._books.get(market_id)
             bids = None
-            if book:
-                if book.get("ob") is not None:
+            received_at = None
+            source_timestamp = None
+            timestamp_source = "unknown"
+            freshness_verified = False
+            if cached is not None:
+                if cached.get("ob") is not None:
                     bids = [
                         {"price": level.get("p"), "quantity": level.get("q")}
-                        for level in (book["ob"] or {}).get("b") or []
+                        for level in (cached["ob"] or {}).get("b") or []
                     ]
-                elif book.get("bids") is not None:
-                    bids = book["bids"]
-            if not bids:
+                elif cached.get("bids") is not None:
+                    bids = cached["bids"]
+                received_at = cached.get("received_at")
+                source_timestamp = cached.get("source_timestamp")
+                timestamp_source = cached.get("timestamp_source") or (
+                    "ws_source" if source_timestamp else "ws_received"
+                )
+                freshness_verified = bool(cached.get("freshness_verified", True))
+            elif not self._require_ws_books:
+                # Explicit non-live/legacy path: REST depth is usable for
+                # calculation but is never marked as verified freshness.
                 bids = raw_market.get("bids")
+                received_at = self._market_received_at.get(market_id)
+                timestamp_source = "rest_received"
+                freshness_verified = False
+            else:
+                # No authoritative WebSocket book: emit no quote rather than
+                # silently substituting REST depth.
+                continue
             bid = _best_bid(bids)
             if bid is None:
                 continue
@@ -308,7 +343,9 @@ class StxProvider(OddsProvider):
             decimal_odds = max_price / price
             if decimal_odds <= 1:
                 continue
-            timestamp = self._clock()
+            timestamp = source_timestamp or received_at
+            if timestamp is None:
+                continue
             quotes.append(
                 ExchangeOdds(
                     provider=self.name,
@@ -328,12 +365,22 @@ class StxProvider(OddsProvider):
                     fee_model="per_wager",
                     fee_factor=self._fee_factor,
                     max_price=max_price,
+                    source_timestamp=source_timestamp,
+                    received_at=received_at,
+                    last_updated_at=source_timestamp,
+                    timestamp_source=timestamp_source,
+                    freshness_verified=freshness_verified,
                 )
             )
         return tuple(quotes)
 
     def get_order_book(self, event_id: str, selection: str):
-        """Lay-side depth for one selection, from the WS book if cached else REST."""
+        """Lay-side depth for one selection.
+
+        Production uses only the authoritative WebSocket ``ob`` snapshot. REST
+        ``bids`` are used only when ``require_ws_books=False`` (explicit legacy
+        paths) and are never marked as verified freshness.
+        """
         from liquidity import build_order_book, build_order_book_from_ws
 
         self._require(event_id)
@@ -341,27 +388,52 @@ class StxProvider(OddsProvider):
             label = raw_market.get("position") or raw_market.get("title") or ""
             if label != selection:
                 continue
+            market_id = raw_market.get("market_id")
             max_price = _to_decimal(raw_market.get("max_price"), Decimal("1"))
-            cached = self._books.get(raw_market.get("market_id"))
-            if cached:
-                ws_timestamp = self._clock()
-                if cached.get("timestamp"):
-                    try:
-                        ws_timestamp = parse_time(cached["timestamp"])
-                    except (ValueError, TypeError):
-                        pass
-                if cached.get("ob"):
+            cached = self._books.get(market_id)
+            if cached is not None:
+                received_at = cached.get("received_at")
+                source_timestamp = cached.get("source_timestamp")
+                timestamp_source = cached.get("timestamp_source") or (
+                    "ws_source" if source_timestamp else "ws_received"
+                )
+                timestamp = source_timestamp or received_at
+                completeness = cached.get("completeness", "COMPLETE")
+                if cached.get("ob") is not None:
                     return build_order_book_from_ws(
-                        cached["ob"], max_price, ws_timestamp,
-                        completeness=cached.get("completeness", "COMPLETE"),
+                        cached["ob"], max_price, timestamp,
+                        completeness=completeness,
+                        received_at=received_at,
+                        source_timestamp=source_timestamp,
+                        timestamp_source=timestamp_source,
+                        freshness_verified=True,
                     )
                 if cached.get("bids") is not None:
                     return build_order_book(
-                        cached["bids"], max_price, ws_timestamp,
-                        completeness=cached.get("completeness", "COMPLETE"),
+                        cached["bids"], max_price, timestamp,
+                        completeness=completeness,
+                        received_at=received_at,
+                        source_timestamp=source_timestamp,
+                        timestamp_source=timestamp_source,
+                        freshness_verified=True,
                     )
-            # REST depth has no per-book timestamp; unknown completeness.
-            return build_order_book(raw_market.get("bids"), max_price, self._clock())
+            if self._require_ws_books:
+                missing = self._missing_books.get(market_id) or {}
+                return build_order_book(
+                    [], max_price, None,
+                    completeness="UNKNOWN",
+                    received_at=missing.get("attempted_at"),
+                    timestamp_source="ws_missing",
+                    freshness_verified=False,
+                )
+            received_at = self._market_received_at.get(market_id)
+            return build_order_book(
+                raw_market.get("bids"), max_price, received_at,
+                completeness="UNKNOWN",
+                received_at=received_at,
+                timestamp_source="rest_received",
+                freshness_verified=False,
+            )
         raise EventNotFoundError(f"{self.name}: selection {selection!r} not found")
 
     def market_ids(self, event_id: str):
@@ -372,29 +444,55 @@ class StxProvider(OddsProvider):
             if market.get("market_id")
         )
 
-    def load_order_books(self, market_ids, timeout: float = 5.0) -> dict:
-        """Fetch live order-book snapshots and cache them for ``get_odds``.
+    def load_order_books(self, market_ids, timeout: float = 5.0, max_attempts: int = 3) -> dict:
+        """Fetch authoritative WebSocket order-book snapshots for ``market_ids``.
 
-        The REST market list does not carry moneyline depth; this fills it from
-        the WebSocket order book so lay quotes reflect live liquidity.
+        Only the requested (matched) markets are subscribed. Missing markets
+        are remembered as unavailable so ``get_odds`` never substitutes REST
+        depth. If no snapshot at all is received, raise so the caller can mark
+        discovery unavailable rather than silently using REST liquidity.
         """
-        from logging_config import get_logger
-
         from .stx_orderbook import StxOrderBookClient
 
+        ids = list(dict.fromkeys(market_ids or []))
+        if not ids:
+            return {}
         client = StxOrderBookClient(
-            self._client.signer, self._base_url, connector=self._ws_connector
+            self._client.signer, self._base_url,
+            connector=self._ws_connector, clock=self._clock,
         )
         try:
-            books = client.market_books(list(market_ids), timeout=timeout)
-        except ProviderUnavailableError as exc:
-            get_logger(__name__).warning("STX order book unavailable: %s", exc)
-            return {}
-        fetched_at = self._clock().isoformat()
-        for market_id, ob in books.items():
+            records = client.market_book_snapshots(
+                ids, timeout=timeout, max_attempts=max_attempts
+            )
+        except Exception as exc:  # noqa: BLE001 - surface as provider unavailable
+            raise ProviderUnavailableError(
+                f"STX WebSocket order books unavailable: {exc}"
+            ) from exc
+        if not records:
+            raise ProviderUnavailableError(
+                "STX WebSocket order books unavailable (no snapshots received)"
+            )
+        for market_id, record in records.items():
             self._books[market_id] = {
-                "ob": ob,
-                "timestamp": fetched_at,
+                "ob": record.get("ob"),
+                "bids": record.get("bids"),
+                "received_at": record.get("received_at") or self._clock(),
+                "source_timestamp": record.get("source_timestamp"),
+                "timestamp_source": record.get("timestamp_source") or (
+                    "ws_source" if record.get("source_timestamp") else "ws_received"
+                ),
+                "freshness_verified": True,
                 "completeness": "COMPLETE",
             }
-        return books
+            self._missing_books.pop(market_id, None)
+        attempted_at = self._clock()
+        for market_id in ids:
+            if market_id not in records:
+                self._missing_books[market_id] = {
+                    "attempted_at": attempted_at,
+                    "reason": "no WebSocket snapshot",
+                }
+        return {
+            market_id: record.get("ob") for market_id, record in records.items()
+        }

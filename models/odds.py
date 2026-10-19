@@ -141,6 +141,14 @@ class ExchangeOdds(NormalizedOdds):
     fee_model: str = "commission"
     fee_factor: Optional[Decimal] = None
     max_price: Optional[Decimal] = None
+    # Timestamp provenance. ``timestamp`` is the canonical observation time;
+    # ``source_timestamp`` is the exchange's own timestamp when it publishes
+    # one, and ``received_at`` is when this process received the snapshot.
+    source_timestamp: Optional[datetime] = None
+    received_at: Optional[datetime] = None
+    last_updated_at: Optional[datetime] = None
+    timestamp_source: str = "unknown"
+    freshness_verified: bool = True
 
     def __post_init__(self):
         object.__setattr__(self, "side", Side.LAY)
@@ -165,3 +173,8 @@ class ExchangeOdds(NormalizedOdds):
             if max_price <= ZERO:
                 raise ValueError("max_price must be greater than 0")
             object.__setattr__(self, "max_price", max_price)
+        for name in ("source_timestamp", "received_at", "last_updated_at"):
+            value = getattr(self, name)
+            if value is not None:
+                _require_aware(value, name)
+        object.__setattr__(self, "timestamp_source", str(self.timestamp_source or "unknown"))

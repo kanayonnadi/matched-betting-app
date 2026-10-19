@@ -1,0 +1,55 @@
+{
+  "sport": "baseball_mlb",
+  "bookmaker": "proline_ca_on",
+  "fetched_at": "2026-10-19T18:54:11.528462+00:00",
+  "request": {
+    "url": "https://api.the-odds-api.com/v4/sports/baseball_mlb/odds",
+    "params": {
+      "apiKey": "<redacted>",
+      "regions": "ca",
+      "markets": "h2h",
+      "oddsFormat": "decimal",
+      "bookmakers": "proline_ca_on"
+    }
+  },
+  "status_code": 200,
+  "response_headers": {
+    "Content-Type": "application/json; charset=utf-8",
+    "x-requests-remaining": "236",
+    "x-requests-last": "1",
+    "x-requests-used": "264"
+  },
+  "payload": [
+    {
+      "id": "be50f6c59c20efa430eec6f146a0fcb1",
+      "sport_key": "baseball_mlb",
+      "sport_title": "MLB",
+      "commence_time": "2026-10-20T00:10:00Z",
+      "home_team": "Tampa Bay Rays",
+      "away_team": "Cleveland Guardians",
+      "bookmakers": [
+        {
+          "key": "proline_ca_on",
+          "title": "PROLINE (CA - ON)",
+          "last_update": "2026-10-19T18:53:58Z",
+          "markets": [
+            {
+              "key": "h2h",
+              "last_update": "2026-10-19T18:53:58Z",
+              "outcomes": [
+                {
+                  "name": "Cleveland Guardians",
+                  "price": 2.16
+                },
+                {
+                  "name": "Tampa Bay Rays",
+                  "price": 1.56
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
